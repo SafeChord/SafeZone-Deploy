@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: analytics-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-api
+  template:
+    metadata:
+      labels:
+        app: analytics-api
+    spec:
+      containers:
+        - name: analytics-api
+          image: {{ .Values.analyticsAPI.image }}
+          ports:
+            - containerPort: {{ .Values.analyticsAPI.port }}
+      affinity:
+        {{- toYaml .Values.analyticsAPI.affinity | nindent 8 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        app: dashboard
+    spec:
+      containers:
+        - name: dashboard
+          image: {{ .Values.dashboard.image }}
+          ports:
+            - containerPort: {{ .Values.dashboard.port }}
+          env:
+            - name: ANALYTICS_API_URL
+              value: http://{{ include "consumer.analyticsAPI.fullname" . }}:{{ .Values.analyticsAPI.port }}
+            {{- toYaml .Values.dashboard.env | nindent 12 }}
+      affinity:
+        {{- toYaml .Values.dashboard.affinity | nindent 8 }}

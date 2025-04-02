@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: covid-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covid-simulator
+  template:
+    metadata:
+      labels:
+        app: covid-simulator
+    spec:
+      containers:
+        - name: covid-simulator
+          image: {{ .Values.covidSimulator.image }}
+          ports:
+            - containerPort: {{ .Values.covidSimulator.port }}
+          env:
+            env:
+            - name: INGESTOR_URL
+              value: http://{{ include "producer.ingestor.fullname" . }}:{{ .Values.covidIngestor.port }}
+      affinity:
+        {{- toYaml .Values.covidSimulator.affinity | nindent 8 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: covid-ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covid-ingestor
+  template:
+    metadata:
+      labels:
+        app: covid-ingestor
+    spec:
+      containers:
+        - name: covid-ingestor
+          image: {{ .Values.covidIngestor.image }}
+          ports:
+            - containerPort: {{ .Values.covidIngestor.port }}
+      affinity:
+        {{- toYaml .Values.covidIngestor.affinity | nindent 8 }}

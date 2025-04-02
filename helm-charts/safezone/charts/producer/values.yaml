@@ -1,0 +1,9 @@
+covidSimulator:
+  image: covid_data_simulator:latest
+  port: 8000
+  affinity: {}
+
+covidIngestor:
+  image: covid_data_ingestor:latest
+  port: 8080
+  affinity: {}

@@ -1,0 +1,32 @@
+aapiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: safezone
+  namespace: gitops
+spec:
+  generators:
+  - list:
+      elements:
+      - name: consumer
+        path: helm-charts/consumer
+      - name: producer
+        path: helm-charts/producer
+  template:
+    metadata:
+      name: "{{name}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
+        targetRevision: dev
+        path: "{{path}}"
+        helm:
+          valueFiles:
+            - values.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: safezone
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

@@ -1,0 +1,38 @@
+# consumer and producer are subcharts of the safezone umbrella chart
+# consumer subchart contains the analytics API and dashboard
+consumer:
+  enabled: true
+  analyticsAPI:
+    affinity: {}
+  dashboard:
+    affinity: {}
+
+# producer subchart contains the simulator and ingestor
+producer:
+  enabled: true
+
+  affinity: {}
+
+ingress:
+  host: "safezone.omh.idv.tw"
+  className: traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+
+cli-relay:
+  affinity: {}
+
+db:
+  internal:
+    enabled: false
+  external:
+    enabled: true
+    # For external database, set the username and password here
+    host: ""
+    port: 5432
+    username: ""
+    password: ""
+    database: "safezone"
+
+cronjob:
+  enabled: false

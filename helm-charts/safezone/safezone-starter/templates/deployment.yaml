@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "your-service.fullname" . }}
+  labels:
+    app: {{ include "your-service.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "your-service.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "your-service.name" . }}
+    spec:
+      containers:
+        - name: your-service
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: postgredb-secret
+                  key: database-url
