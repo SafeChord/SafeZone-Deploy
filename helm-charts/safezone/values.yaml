@@ -1,38 +1,51 @@
-# consumer and producer are subcharts of the safezone umbrella chart
+# umbrella values for the safezone project
+global:
+  db:
+    dbSecret: safezone-db-secret
+
 # consumer subchart contains the analytics API and dashboard
 consumer:
-  enabled: true
   analyticsAPI:
     affinity: {}
+    port: 8000
   dashboard:
     affinity: {}
+    port: 8080
 
 # producer subchart contains the simulator and ingestor
 producer:
-  enabled: true
+  simulator:
+    affinity: {}
+    port: 8000
+  ingestor:
+    affinity: {}
+    port: 8000
 
-  affinity: {}
-
-ingress:
-  host: "safezone.omh.idv.tw"
-  className: traefik
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-
-cli-relay:
-  affinity: {}
-
-db:
-  internal:
-    enabled: false
-  external:
+# the addon tools for the safezone project
+addons:
+  # cli-relay is a tool receive the command from admin and bypassing requests to services in safezone
+  # and db operations, then return the result to admin
+  cli-relay:
+    service:
+      port: 8000
     enabled: true
-    # For external database, set the username and password here
-    host: ""
-    port: 5432
-    username: ""
-    password: ""
-    database: "safezone"
+    affinity: {}
+  # cronjob is a tool for running scheduled tasks
+  cronjob:
+    enabled: false
+    affinity: {}
 
-cronjob:
-  enabled: false
+# ingress for the safezone project
+# this ingress is used for the consumer dashboard and cli-relay
+ingress:
+  enabled: true
+  className: traefik
+  host: safezone.omh.idv.tw
+  
+  dashboard:
+    path: /dashboard
+    port: 8080
+  
+  cli-relay:
+    path: /cli
+    port: 8003

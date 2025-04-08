@@ -1,0 +1,15 @@
+🚀 SafeZone 部署完成！
+
+📊 Dashboard 入口：
+  {{ include "safezone.dashboardUrl" . }}
+
+🛠️ CLI 指令入口：
+  {{ include "safezone.cliRelayUrl" . }}
+
+📍 共用設定 ConfigMap：
+  {{ include "safezone.fullname" . }}-config
+
+若您啟用了 ingress，請確認您的 DNS 指向：
+  http://{{ include "safezone.ingressHost" . }}
+
+Have a nice deploy 🍻

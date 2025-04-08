@@ -2,24 +2,29 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: covid-simulator
+  name: {{ include "producer.simulator.svcname" . }}
+  labels:
+    {{- include "producer.selectorLabels" . | nindent 4 }}
 spec:
   selector:
     app: covid-simulator
+  type: ClusterIP
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: {{ .Values.covidSimulator.port }}
-
+      port: {{ .Values.simulator.port }}
+      targetPort: 8000
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: covid-ingestor
+  name: {{ include "producer.ingestor.svcname" . }}
+  labels:
+    {{- include "producer.selectorLabels" . | nindent 4 }}
 spec:
   selector:
     app: covid-ingestor
+  type: ClusterIP
   ports:
     - protocol: TCP
-      port: 8000
-      targetPort: {{ .Values.covidIngestor.port }}
+      port: {{ .Values.ingestor.port }}
+      targetPort: 8000

@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cli-relay
+  labels:
+    {{- include "cliRelay.selectorLabels" . | nindent 4 }}
+    app: cli-relay
+spec:
+  selector:
+    matchLabels:
+      app: cli-relay
+  template:
+    metadata:
+      labels:
+        {{- include "cliRelay.selectorLabels" . | nindent 8 }}
+        app: cli-relay
+    spec:
+      containers:
+        - name: cli-relay
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: SIMULATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: SIMULATOR_URL
+            - name: ANALYTICS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: ANALYTICS_URL
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.db.dbSecret }}
+                  key: db-url
+
+            {{- if .Values.env }}
+            {{- toYaml .Values.env | nindent 12 }}
+            {{- end }}
+
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}

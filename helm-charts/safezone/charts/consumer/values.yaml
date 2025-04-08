@@ -1,24 +1,20 @@
 analyticsAPI:
-  image: safezone_analytics_api:latest
+  image: safezone_analytics_api
+  tag: latest
   port: 8000
   affinity: {}
+  env: {}
 
 dashboard:
-  image: safezone_dashboard:latest
+  image: safezone_dashboard
+  tag: latest
   port: 8080
   env:
     - name: FREEZE_TIME
       value: "2023-04-30"
   affinity: {}
 
-ingress:
-  enabled: true
-  className: traefik
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
-  hosts:
-    - host: safezone.omh.idv.tw
-      paths:
-        - path: /
-          pathType: Prefix
-  tls: []
+
+global:
+  db:
+    dbSecret: ""

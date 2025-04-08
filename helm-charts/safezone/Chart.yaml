@@ -14,7 +14,4 @@ dependencies:
   repository: "file://charts/producer"
 - name: cli-relay
   version: 0.1.0
-  repository: "file://charts/tools/cli-relay"
-- name: cronjob
-  version: 0.1.0
-  repository: "file://charts/tools/cronjob"
+  repository: "file://charts/cli-relay"

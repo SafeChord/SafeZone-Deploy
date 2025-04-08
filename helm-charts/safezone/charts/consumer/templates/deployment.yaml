@@ -3,6 +3,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: analytics-api
+  labels:
+    {{- include "consumer.selectorLabels" . | nindent 4 }}
+    app: analytics-api
 spec:
   replicas: 1
   selector:
@@ -11,13 +14,18 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "consumer.selectorLabels" . | nindent 8 }}
         app: analytics-api
     spec:
       containers:
         - name: analytics-api
-          image: {{ .Values.analyticsAPI.image }}
+          image: {{ .Values.analyticsAPI.image }}:{{ .Values.analyticsAPI.tag }}
           ports:
             - containerPort: {{ .Values.analyticsAPI.port }}
+          {{- if .Values.env }}
+          env:
+            {{- toYaml .Values.analyticsAPI.env | nindent 14 }}
+          {{- end }}
       affinity:
         {{- toYaml .Values.analyticsAPI.affinity | nindent 8 }}
 
@@ -26,6 +34,9 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: dashboard
+  labels:
+    {{- include "consumer.selectorLabels" . | nindent 4 }}
+    app: dashboard
 spec:
   replicas: 1
   selector:
@@ -34,16 +45,28 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "consumer.selectorLabels" . | nindent 8 }}
         app: dashboard
     spec:
       containers:
         - name: dashboard
-          image: {{ .Values.dashboard.image }}
+          image: {{ .Values.dashboard.image }}:{{ .Values.dashboard.tag }}
           ports:
             - containerPort: {{ .Values.dashboard.port }}
+
           env:
-            - name: ANALYTICS_API_URL
-              value: http://{{ include "consumer.analyticsAPI.fullname" . }}:{{ .Values.analyticsAPI.port }}
-            {{- toYaml .Values.dashboard.env | nindent 12 }}
+            - name: ANALYTICS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: ANALYTICS_URL
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.db.dbSecret }}
+                  key: replica-url     
+            {{- if .Values.env }}
+            {{- toYaml .Values.dashboard.env | nindent 14 }}
+            {{- end }}
       affinity:
         {{- toYaml .Values.dashboard.affinity | nindent 8 }}

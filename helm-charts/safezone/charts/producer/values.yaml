@@ -1,9 +1,17 @@
-covidSimulator:
-  image: covid_data_simulator:latest
+global:
+  db:
+    dbSecret: ""
+
+simulator:
+  image: covid_data_simulator
+  tag: latest
   port: 8000
+  env: {}
   affinity: {}
 
-covidIngestor:
-  image: covid_data_ingestor:latest
-  port: 8080
+ingestor:
+  image: covid_data_ingestor
+  tag: latest
+  port: 8001
+  env: {}
   affinity: {}

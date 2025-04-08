@@ -2,6 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- include "producer.selectorLabels" . | nindent 2 }}
   name: covid-simulator
 spec:
   replicas: 1
@@ -11,24 +12,31 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "producer.selectorLabels" . | nindent 8 }}
         app: covid-simulator
     spec:
       containers:
         - name: covid-simulator
-          image: {{ .Values.covidSimulator.image }}
+          image: {{ .Values.simulator.image }}:{{ .Values.simulator.tag }}
           ports:
-            - containerPort: {{ .Values.covidSimulator.port }}
+            - containerPort: 8000
           env:
-            env:
             - name: INGESTOR_URL
-              value: http://{{ include "producer.ingestor.fullname" . }}:{{ .Values.covidIngestor.port }}
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: INGESTOR_URL
+          {{- if .Values.simulator.env }}
+            {{- toYaml .Values.simulator.env | nindent 14 }}
+          {{- end }}
       affinity:
-        {{- toYaml .Values.covidSimulator.affinity | nindent 8 }}
+        {{- toYaml .Values.simulator.affinity | nindent 8 }}
 
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  {{- include "producer.selectorLabels" . | nindent 2 }}
   name: covid-ingestor
 spec:
   replicas: 1
@@ -38,12 +46,23 @@ spec:
   template:
     metadata:
       labels:
+        {{- include "producer.selectorLabels" . | nindent 8 }}
         app: covid-ingestor
     spec:
       containers:
         - name: covid-ingestor
-          image: {{ .Values.covidIngestor.image }}
+          image: {{ .Values.ingestor.image }}:{{ .Values.ingestor.tag }}
           ports:
-            - containerPort: {{ .Values.covidIngestor.port }}
+            - containerPort: 8000
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.db.dbSecret | quote }}
+                  key: db-url
+          {{- if .Values.ingestor.env }}
+          env:
+            {{- toYaml .Values.ingestor.env | nindent 14 }}
+          {{- end }}
       affinity:
-        {{- toYaml .Values.covidIngestor.affinity | nindent 8 }}
+        {{- toYaml .Values.ingestor.affinity | nindent 8 }}
