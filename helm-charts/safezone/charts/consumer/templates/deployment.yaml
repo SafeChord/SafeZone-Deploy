@@ -19,16 +19,21 @@ spec:
     spec:
       containers:
         - name: analytics-api
-          image: {{ .Values.analyticsAPI.image }}:{{ .Values.analyticsAPI.tag }}
+          image: {{ .Values.global.repository }}/{{ .Values.analyticsAPI.image }}:{{ .Values.analyticsAPI.tag }}
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.analyticsAPI.port }}
-          {{- if .Values.env }}
+            - containerPort: 8000
           env:
-            {{- toYaml .Values.analyticsAPI.env | nindent 14 }}
-          {{- end }}
+            - name: SERVICE_VERSION
+              value: {{ .Values.analyticsAPI.tag | quote }}   
+            - name: SERVICE_PORT
+              value: {{ .Values.analyticsAPI.env.port | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.analyticsAPI.env.log.level | quote }}
+            - name: LOG_FILE_SIZE
+              value: {{ .Values.analyticsAPI.env.log.file_size | quote }}
       affinity:
         {{- toYaml .Values.analyticsAPI.affinity | nindent 8 }}
-
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -50,12 +55,12 @@ spec:
     spec:
       containers:
         - name: dashboard
-          image: {{ .Values.dashboard.image }}:{{ .Values.dashboard.tag }}
+          image: {{ .Values.global.repository }}/{{ .Values.dashboard.image }}:{{ .Values.dashboard.tag }}
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: {{ .Values.dashboard.port }}
-
+            - containerPort: 8080
           env:
-            - name: ANALYTICS_URL
+            - name: ANALYTICS_API_URL
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "safezone.fullname" . }}-config
@@ -65,8 +70,15 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.global.db.dbSecret }}
                   key: replica-url     
-            {{- if .Values.env }}
-            {{- toYaml .Values.dashboard.env | nindent 14 }}
-            {{- end }}
+            - name: SERVICE_VERSION
+              value: {{ .Values.dashboard.tag | quote }}   
+            - name: SERVICE_PORT
+              value: {{ .Values.dashboard.env.port | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.dashboard.env.log.level | quote }}
+            - name: LOG_FILE_SIZE
+              value: {{ .Values.dashboard.env.log.file_size | quote }}
+            - name: FREEZE_TIME
+              value: {{ .Values.dashboard.env.freeze_time | quote }}
       affinity:
         {{- toYaml .Values.dashboard.affinity | nindent 8 }}

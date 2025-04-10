@@ -1,0 +1,26 @@
+# global values from umbrella chart is shared detween subcharts
+global:
+  db:
+    dbSecret: ""
+  repository: ""
+
+image:
+  repository: safezone_cli_relay
+  tag: latest
+  
+service:
+  port: 8000
+
+auth:
+  authSecret: ""
+
+env: 
+  # inner port for container
+  port: 8000
+  log:
+    level: INFO
+    # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
+    # this is the size of the log file, if the file size is larger than this, it will be rotated
+    file_size: 5242880
+
+affinity: {}

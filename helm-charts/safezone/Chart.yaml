@@ -6,12 +6,19 @@ version: 0.1.0
 appVersion: "1.0.0"
 
 dependencies:
+# The core subcharts for the safezone project
 - name: consumer
   version: 0.1.0
   repository: "file://charts/consumer"
 - name: producer
   version: 0.1.0
   repository: "file://charts/producer"
-- name: cli-relay
+# Addons for the safezone project
+- name: cliRelay
   version: 0.1.0
-  repository: "file://charts/cli-relay"
+  repository: "file://charts/cliRelay"
+  condition: cliRelay.enabled
+# - name: cronjob
+#   version: 0.1.0
+#   repository: "file://charts/cronjob"
+#   condition: cronjob.enabled

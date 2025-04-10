@@ -17,14 +17,16 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{- include "safezone.consumer.dashboard.svcname" . }}
+                name: "{{ include "safezone.consumer.dashboard.svcname" . }}"
                 port:
-                  number: {{ .Values.ingress.dashboard.port }}
-          - path: {{ .Values.ingress.cli-relay.path }}
+                  name: http
+          {{- if .Values.cliRelay.enabled }}
+          - path: {{ .Values.ingress.cliRelay.path }}
             pathType: Prefix
             backend:
               service:
-                name: {{- include "safezone.addon.clirelay.svcname" . }}
+                name: "{{ include "safezone.addons.cliRelay.svcname" . }}"
                 port:
-                  number: {{ .Values.ingress.cli-relay.port }}      
+                  name: http   
+          {{- end }}  
 {{- end }}

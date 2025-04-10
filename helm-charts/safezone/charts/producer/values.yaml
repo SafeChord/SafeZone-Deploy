@@ -1,17 +1,38 @@
+# global tag is shared in umbrella chart between subcharts 
 global:
   db:
     dbSecret: ""
+  repository: ""
 
 simulator:
   image: covid_data_simulator
   tag: latest
-  port: 8000
-  env: {}
+  service:
+    # accessible port in k8s 
+    port: 8000
+  env:
+    # inner port for container
+    port: 8000
+    log:
+      level: INFO
+      # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
+      # this is the size of the log file, if the file size is larger than this, it will be rotated
+      file_size: 5242880
   affinity: {}
+
 
 ingestor:
   image: covid_data_ingestor
   tag: latest
-  port: 8001
-  env: {}
+  service:
+    # accessible port in k8s 
+    port: 8001
+  env:
+    # inner port for container
+    port: 8000
+    log:
+      level: INFO
+      # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
+      # this is the size of the log file, if the file size is larger than this, it will be rotated
+      file_size: 5242880
   affinity: {}

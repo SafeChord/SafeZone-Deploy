@@ -1,5 +1,5 @@
 apiVersion: v2
-name: cli-relay
+name: cliRelay
 description: relay service for CLI
 type: application
 version: 0.1.0

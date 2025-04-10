@@ -23,47 +23,42 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{ .Values.ingress.host }}
 {{- end }}
 
-{{/* Analytics API */}}
 {{- define "safezone.consumer.api.svcname" -}}
 {{ .Release.Name }}-consumer-analytics-api
 {{- end}}
 
 {{- define "safezone.consumer.api.url" -}}
-http://{{- include safezone.consumer.api.svcname}}:{{ .Values.consumer.analyticsAPI.port }}
+http://{{- include "safezone.consumer.api.svcname" . }}:{{ .Values.consumer.analyticsAPI.service.port }}
 {{- end }}
 
-{{/* Dashboard */}}
 {{- define "safezone.consumer.dashboard.svcname" -}}
 {{ .Release.Name }}-consumer-dashboard
 {{- end}}
 
 {{- define "safezone.consumer.dashboard.url" -}}
-http://{{- include safezone.consumer.dashboard.svcname}}:{{ .Values.consumer.dashboard.port }}
+http://{{- include "safezone.consumer.dashboard.svcname" . }}:{{ .Values.consumer.dashboard.service.port }}
 {{- end }}
 
-{{/* Simulator */}}
 {{- define "safezone.producer.simulator.svcname" -}}
 {{ .Release.Name }}-producer-simulator
 {{- end}}
 
 {{- define "safezone.producer.simulator.url" -}}
-http://{{- include safezone.producer.simulator.svcname}}:{{ .Values.producer.simulator.port }}
+http://{{- include "safezone.producer.simulator.svcname" . }}:{{ .Values.producer.simulator.service.port }}
 {{- end }}
 
-{{/* Ingestor */}}
 {{- define "safezone.producer.ingestor.svcname" -}}
 {{ .Release.Name }}-producer-ingestor
 {{- end}}
 
 {{- define "safezone.producer.ingestor.url" -}}
-http://{{- include safezone.producer.ingestor.svcname}}:{{ .Values.producer.ingestor.port }}
+http://{{- include "safezone.producer.ingestor.svcname" . }}:{{ .Values.producer.ingestor.service.port }}
 {{- end }}
 
-{{/* CLI Relay */}}
-{{- define "safezone.addon.clirelay.svcname" -}}
-{{ .Release.Name }}-addon-cli-relay
+{{- define "safezone.addons.cliRelay.svcname" -}}
+{{ .Release.Name }}-addons-cli-relay
 {{- end }}
 
-{{- define "safezone.addon.clirelay.url" -}}
-http://{{- include safezone.addon.clirelay.svcname}}:{{ .Values.addons.cli-relay.port }}
+{{- define "safezone.addons.cliRelay.url" -}}
+http://{{- include "safezone.addons.cliRelay.svcname" . }}:{{ .Values.cliRelay.service.port }}
 {{- end }}

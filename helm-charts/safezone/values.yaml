@@ -2,38 +2,44 @@
 global:
   db:
     dbSecret: safezone-db-secret
+  repository: ghcr.io/rebodutch
 
 # consumer subchart contains the analytics API and dashboard
 consumer:
   analyticsAPI:
+    service:
+      port: 8000
     affinity: {}
-    port: 8000
   dashboard:
+    service:
+      port: 8080
     affinity: {}
-    port: 8080
 
 # producer subchart contains the simulator and ingestor
 producer:
   simulator:
-    affinity: {}
-    port: 8000
-  ingestor:
-    affinity: {}
-    port: 8000
-
-# the addon tools for the safezone project
-addons:
-  # cli-relay is a tool receive the command from admin and bypassing requests to services in safezone
-  # and db operations, then return the result to admin
-  cli-relay:
     service:
       port: 8000
-    enabled: true
     affinity: {}
-  # cronjob is a tool for running scheduled tasks
-  cronjob:
-    enabled: false
+  ingestor:
+    service:
+      port: 8000
     affinity: {}
+
+# the addons for the safezone project
+# cli-relay is a tool receive the command from admin and bypassing requests to services in safezone
+# and db operations, then return the result to admin
+cliRelay:
+  enabled: true
+  service:
+    port: 5566
+  auth:
+    authSecret: safezone-cli-relay-secret
+  affinity: {}
+# cronjob is a tool for running scheduled tasks
+cronjob:
+  enabled: false
+  affinity: {}
 
 # ingress for the safezone project
 # this ingress is used for the consumer dashboard and cli-relay
@@ -41,11 +47,7 @@ ingress:
   enabled: true
   className: traefik
   host: safezone.omh.idv.tw
-  
   dashboard:
     path: /dashboard
-    port: 8080
-  
-  cli-relay:
+  cliRelay:
     path: /cli
-    port: 8003

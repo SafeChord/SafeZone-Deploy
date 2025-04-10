@@ -1,20 +1,38 @@
-analyticsAPI:
-  image: safezone_analytics_api
-  tag: latest
-  port: 8000
-  affinity: {}
-  env: {}
-
-dashboard:
-  image: safezone_dashboard
-  tag: latest
-  port: 8080
-  env:
-    - name: FREEZE_TIME
-      value: "2023-04-30"
-  affinity: {}
-
-
+# global values from umbrella chart is shared detween subcharts
 global:
   db:
     dbSecret: ""
+  repository: ""
+
+analyticsAPI:
+  image: safezone_analytics_api
+  tag: latest
+  service:
+    port: 8000
+  env:
+    # inner port for container
+    port: 8000
+    log:
+      level: INFO
+      # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
+      # this is the size of the log file, if the file size is larger than this, it will be rotated
+      file_size: 5242880
+  affinity: {}
+  
+dashboard:
+  image: safezone_dashboard
+  tag: latest
+  service:
+    port: 8080
+  env:
+    # freeze_time is used to freeze the time in the dashboard
+    # this is used for testing purpose for simulate the history data
+    freeze_time: "2023-04-30"
+    # inner port for container
+    port: 8000
+    log:
+      level: INFO
+      # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
+      # this is the size of the log file, if the file size is larger than this, it will be rotated
+      file_size: 5242880
+  affinity: {}

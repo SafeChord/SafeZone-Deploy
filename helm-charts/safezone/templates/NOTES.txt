@@ -1,0 +1,34 @@
+🚀 SafeZone 部署完成！
+
+📍 共用設定 ConfigMap：
+  {{ include "safezone.fullname" . }}-config
+
+{{- if not .Values.ingress.enabled }}
+
+🔌 您尚未啟用 Ingress，請透過 port-forward 存取服務：
+
+📊 Dashboard 入口：
+  {{ include "safezone.consumer.dashboard.url" . }}
+
+{{- if .Values.cliRelay.enabled }}
+
+🛠️ CLI 指令入口：
+  {{ include "safezone.addons.cliRelay.url" . }}
+{{- end }}
+
+{{- else }}
+
+🌐 您已啟用 Ingress，請透過以下網址存取服務：
+
+📊 Dashboard 入口：
+  http://{{ include "safezone.ingressHost" . }}{{ .Values.ingress.dashboard.path }}
+
+{{- if .Values.cliRelay.enabled }}
+
+🛠️ CLI 指令入口：
+  http://{{ include "safezone.ingressHost" . }}{{ .Values.ingress.cliRelay.path }}
+{{- end }}
+
+{{- end }}
+
+Have a nice deploy 🍻

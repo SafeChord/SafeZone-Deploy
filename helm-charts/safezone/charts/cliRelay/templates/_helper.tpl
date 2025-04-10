@@ -20,5 +20,5 @@ app.kubernetes.io/instance: {{ .Release.Name }}-{{ .Chart.Name }}
 {{- end }}
 
 {{- define "cliRelay.svcname" -}}
-{{ .Release.Name }}-addon-cli-relay
+{{ .Release.Name }}-addons-cli-relay
 {{- end }}
