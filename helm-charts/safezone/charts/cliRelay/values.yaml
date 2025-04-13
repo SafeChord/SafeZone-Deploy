@@ -4,9 +4,8 @@ global:
     dbSecret: ""
   repository: ""
 
-image:
-  repository: safezone_cli_relay
-  tag: latest
+image: safezone_cli_relay
+tag: latest
   
 service:
   port: 8000

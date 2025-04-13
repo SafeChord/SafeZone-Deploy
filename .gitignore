@@ -1,1 +1,6 @@
-value-secret.yaml
+# secret files
+unsealed-*
+
+# for helm debug
+rendered/
+dry_run.*

@@ -1,8 +1,13 @@
 # umbrella values for the safezone project
 global:
+  # the secret for the database will be shared between all subcharts
+  # there are two keys should be set with following format in the secret
+  # - db_url: postgres://<username>:<password>@<db_host>:<db_port>/<database>
+  # - replicas_url : postgres://<username>:<password>@<replicas_host>:<db_port>/<database>
   db:
-    dbSecret: safezone-db-secret
-  repository: ghcr.io/rebodutch
+    dbSecret: ""
+  # the repository for all subechart images
+  repository: ""
 
 # consumer subchart contains the analytics API and dashboard
 consumer:
@@ -32,9 +37,9 @@ producer:
 cliRelay:
   enabled: true
   service:
-    port: 5566
+    port: 8000
   auth:
-    authSecret: safezone-cli-relay-secret
+    authSecret: ""
   affinity: {}
 # cronjob is a tool for running scheduled tasks
 cronjob:
@@ -44,9 +49,11 @@ cronjob:
 # ingress for the safezone project
 # this ingress is used for the consumer dashboard and cli-relay
 ingress:
-  enabled: true
+  enabled: false
+  # the ingress class name for the ingress controller, default is traefik
   className: traefik
-  host: safezone.omh.idv.tw
+  # the host name for the ingress
+  host: ""
   dashboard:
     path: /dashboard
   cliRelay:
