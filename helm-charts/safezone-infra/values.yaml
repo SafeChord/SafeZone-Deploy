@@ -1,0 +1,6 @@
+cliRelay:
+  service:
+    port: 8000
+  auth:
+    authSecret: ""
+  affinity: {}

@@ -15,10 +15,11 @@ spec:
         {{- include "cliRelay.selectorLabels" . | nindent 8 }}
         app: cli-relay
     spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.image.pullSecret }}
       containers:
         - name: cli-relay
-          image: {{ .Values.global.repository }}/{{ .Values.image }}:{{ .Values.tag }}
-          imagePullPolicy: IfNotPresent
+          image: {{ .Values.global.image.repository }}/{{ .Values.image }}:{{ .Values.tag }}
           ports:
             - containerPort: 8000
           env:
@@ -36,7 +37,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.global.db.dbSecret }}
-                  key: db-url
+                  key: db_url
             - name: ADMIN_EMAILS
               valueFrom:
                 secretKeyRef:

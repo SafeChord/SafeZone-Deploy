@@ -1,8 +1,10 @@
 # umbrella values for the safezone project
 global:
   db:
-    dbSecret: SafezoneDBSecret
-  repository: ghcr.io/rebodutch
+    dbSecret: safezone-db-secrets
+  image:
+    repository: ghcr.io/rebodutch
+    pullSecret: ghcr-secret
 
 # consumer subchart contains the analytics API and dashboard
 consumer:
@@ -53,7 +55,7 @@ producer:
 # the addons for the safezone project
 cliRelay:
   auth:
-    authSecret: SafezoneAuthSecrets
+    authSecret: safezone-auth-secrets
   affinity: 
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

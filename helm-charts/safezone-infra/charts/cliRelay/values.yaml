@@ -2,7 +2,9 @@
 global:
   db:
     dbSecret: ""
-  repository: ""
+  image:
+    pullSecret: ""
+    repository: ""
 
 image: safezone_cli_relay
 tag: latest
@@ -20,6 +22,6 @@ env:
     level: INFO
     # the size calculated by 1024 * 1024 * 5 = 5242880 (5MB)
     # this is the size of the log file, if the file size is larger than this, it will be rotated
-    file_size: 5242880
+    file_size: "5242880"
 
 affinity: {}

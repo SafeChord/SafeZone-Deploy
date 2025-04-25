@@ -3,4 +3,7 @@ unsealed-*
 
 # for helm debug
 rendered/
-dry_run.*
+dry_run.txt
+
+# previous versions
+*-old/
