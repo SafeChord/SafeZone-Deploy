@@ -1,0 +1,62 @@
+# umbrella values for the safezone project
+global:
+  # the secret for the database will be shared between all subcharts
+  # there are two keys should be set with following format in the secret
+  # - db_url: postgres://<username>:<password>@<db_host>:<db_port>/<database>
+  # - replicas_url : postgres://<username>:<password>@<replicas_host>:<db_port>/<database>
+  db:
+    dbSecret: ""
+  # the repository for all subechart images
+  image:
+    pullSecret: ""
+    repository: ""
+
+# consumer subchart contains the analytics API and dashboard
+consumer:
+  analyticsAPI:
+    service:
+      port: 8000
+    affinity: {}
+  dashboard:
+    service:
+      port: 8080
+    affinity: {}
+
+# producer subchart contains the simulator and ingestor
+producer:
+  simulator:
+    service:
+      port: 8000
+    affinity: {}
+  ingestor:
+    service:
+      port: 8000
+    affinity: {}
+
+# the addons for the safezone project
+# cli-relay is a tool receive the command from admin and bypassing requests to services in safezone
+# and db operations, then return the result to admin
+cliRelay:
+  enabled: true
+  service:
+    port: 8000
+  auth:
+    authSecret: ""
+  affinity: {}
+# cronjob is a tool for running scheduled tasks
+cronjob:
+  enabled: false
+  affinity: {}
+
+# ingress for the safezone project
+# this ingress is used for the consumer dashboard and cli-relay
+ingress:
+  enabled: false
+  # the ingress class name for the ingress controller, default is traefik
+  className: traefik
+  # the host name for the ingress
+  host: ""
+  dashboard:
+    path: /dashboard
+  cliRelay:
+    path: /cli

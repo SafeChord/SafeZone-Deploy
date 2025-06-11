@@ -1,0 +1,32 @@
+{{- if .Values.ingress.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "safezone.fullname" . }}-ingress
+  labels:
+    {{ include "safezone.selectorLabels" . | nindent 4 }}
+  annotations:
+    {{ .Values.ingress.className}}.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  ingressClassName: {{ .Values.ingress.className }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingress.dashboard.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ include "safezone.consumer.dashboard.svcname" . }}"
+                port:
+                  name: http
+          {{- if .Values.cliRelay.enabled }}
+          - path: {{ .Values.ingress.cliRelay.path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: "{{ include "safezone.addons.cliRelay.svcname" . }}"
+                port:
+                  name: http   
+          {{- end }}  
+{{- end }}

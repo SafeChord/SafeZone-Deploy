@@ -1,0 +1,24 @@
+apiVersion: v2
+name: safezone
+description: Umbrella chart for SafeZone project
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+# The core subcharts for the safezone project
+- name: consumer
+  version: 0.1.0
+  repository: "file://charts/consumer"
+- name: producer
+  version: 0.1.0
+  repository: "file://charts/producer"
+# Addons for the safezone project
+- name: cliRelay
+  version: 0.1.0
+  repository: "file://charts/cliRelay"
+  condition: cliRelay.enabled
+# - name: cronjob
+#   version: 0.1.0
+#   repository: "file://charts/cronjob"
+#   condition: cronjob.enabled
