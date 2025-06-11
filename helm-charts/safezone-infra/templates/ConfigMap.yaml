@@ -5,8 +5,16 @@ metadata:
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
 data:
-  SIMULATOR_URL: "{{ include "safezone.core.simulator.url" . }}"
-  INGESTOR_URL: "{{ include "safezone.core.ingestor.url" . }}"
-  ANALYTICS_URL: "{{ include "safezone.core.api.url" . }}"
-  CLI_RELAY_URL: "{{ include "safezone.infra.cliRelay.url" . }}"
-  REDIS_URL: "{{ include "safezone.infra.redis.url" . }}"
+  # cliRelays
+  CLI_RELAY_URL: "{{ include "safezone.cliRelay.url" . }}"
+  # simulator
+  SIMULATOR_URL: "{{ include "safezone.simulator.url" . }}"
+  # ingestor
+  INGESTOR_URL: "{{ include "safezone.ingestor.url" . }}"
+  # analyticsAPI
+  ANALYTICS_API_URL: "{{ include "safezone.analyticsAPI.url" . }}"
+  # dashboard
+  DASHBOARD_URL: "{{ include "safezone.dashboard.url" . }}"
+  # redis
+  REDIS_SYS: "{{ include "safezone.redisSys.accessible" . }}"
+  REDIS_CACHE: "{{ include "safezone.redisCache.accessible" . }}"

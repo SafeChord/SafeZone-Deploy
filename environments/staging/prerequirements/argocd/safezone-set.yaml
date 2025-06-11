@@ -7,22 +7,33 @@ spec:
   generators:
   - list:
       elements:
-      - name: consumer
-        path: helm-charts/consumer
-      - name: producer
-        path: helm-charts/producer
+      - phase: infra
+        path: helm-charts/safezone-infra
+        wave: 0
+      - phase: core
+        path: helm-charts/safezone-core
+        wave: 1
+      - phase: init
+        path: helm-charts/safezone-init
+        wave: 2
+      - phase: ui
+        path: helm-charts/safezone-ui
+        wave: 3
   template:
     metadata:
-      name: "{{name}}"
+      name: safezone-"{{phase}}"
+    annotations:
+      argocd.argoproj.io/sync-wave: "{{wave}}"
     spec:
       project: default
       source:
         repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
-        targetRevision: dev
+        targetRevision: stagging
         path: "{{path}}"
         helm:
           valueFiles:
             - values.yaml
+            - values-custom.yaml
       destination:
         server: https://kubernetes.default.svc
         namespace: safezone

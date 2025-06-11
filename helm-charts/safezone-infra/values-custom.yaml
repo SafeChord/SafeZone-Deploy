@@ -1,0 +1,57 @@
+redis-sys:
+  auth:
+    existingSecret: safezone-redis-sys-secret
+  master:
+    persistence:
+      accessModes:
+        - ReadWriteMany
+      size: 1Gi
+      storageClass: local-nfs
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/local-backbone
+                operator: In
+                values:
+                  - true
+redis-cache:
+  auth:
+    existingSecret: safezone-redis-cache-secret
+  master:
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/local-backbone
+                operator: In
+                values:
+                  - true
+
+cliRelay:
+  image:
+    pullSecret: ghcr-pull-secret
+  auth:
+    roleFile: /app/roles.yml
+    dbSecret: safezone-db-secrets
+    authSecret: safezone-auth-secrets
+  affinity: 
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+            - key: chorde.io/avail
+              operator: In
+              values: 
+              - always
+
+ingress:
+  className: nginx-public 
+  host: safezone.omh.idv.tw
+  dashboard:
+    path: /dashboard 
+  cliRelay:
+    path: /cli
+  

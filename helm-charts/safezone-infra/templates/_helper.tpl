@@ -1,6 +1,4 @@
-{{/*
-Shared helpers for SafeZone umbrella chart
-*/}}
+{{/* helpers for SafeZone infra umbrella chart */}}
 
 {{- define "safezone.name" -}}
 safezone
@@ -19,54 +17,92 @@ app.kubernetes.io/name: {{ include "safezone.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{- define "safezone.ingressHost" -}}
-{{ .Values.ingress.host }}
+{{- define "safezone.domain" -}}
+safezone
 {{- end }}
 
-{{- define "safezone.core.api.svcname" -}}
-{{ .Release.Name }}-consumer-analytics-api
-{{- end}}
+{{/* helpers.tpl - SafeZone default ports / constants */}}
 
-{{- define "safezone.core.api.url" -}}
-http://{{- include "safezone.core.api.svcname" . }}:{{ .Values.consumer.analyticsAPI.service.port }}
+{{- define "safezone.cliRelay.port" -}}
+8000
 {{- end }}
 
-{{- define "safezone.ui.dashboard.svcname" -}}
-{{ .Release.Name }}-consumer-dashboard
-{{- end}}
-
-{{- define "safezone.ui.dashboard.url" -}}
-http://{{- include "safezone.core.dashboard.svcname" . }}:{{ .Values.consumer.dashboard.service.port }}
+{{- define "safezone.cliRelay.svcname" -}}
+safezone-cli-relay
 {{- end }}
 
-{{- define "safezone.core.simulator.svcname" -}}
-{{ .Release.Name }}-producer-simulator
-{{- end}}
-
-{{- define "safezone.core.simulator.url" -}}
-http://{{- include "safezone.core.simulator.svcname" . }}:{{ .Values.producer.simulator.service.port }}
+{{- define "safezone.cliRelay.url" -}}
+http://{{ include "safezone.cliRelay.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.cliRelay.port" . }}
 {{- end }}
 
-{{- define "safezone.core.ingestor.svcname" -}}
-{{ .Release.Name }}-producer-ingestor
-{{- end}}
-
-{{- define "safezone.core.ingestor.url" -}}
-http://{{- include "safezone.core.ingestor.svcname" . }}:{{ .Values.producer.ingestor.service.port }}
+{{- define "safezone.simulator.port" -}}
+8001
 {{- end }}
 
-{{- define "safezone.infra.cliRelay.svcname" -}}
-{{ .Release.Name }}-addons-cli-relay
+{{- define "safezone.simulator.svcname" -}}
+safezone-simulator
 {{- end }}
 
-{{- define "safezone.infra.cliRelay.url" -}}
-http://{{- include "safezone.infra.cliRelay.svcname" . }}:{{ .Values.cliRelay.service.port }}
+{{- define "safezone.simulator.url" -}}
+http://{{ include "safezone.simulator.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.simulator.port" . }}
 {{- end }}
 
-{{- define "safezone.infra.redis.svcname" -}}
-{{ .Release.Name }}-addons-redis
+{{- define "safezone.ingestor.port" -}}
+8002
 {{- end }}
 
-{{- define "safezone.infra.redis.url" -}}
-http://{{- include "safezone.infra.redis.svcname" . }}:{{ .Values.redis.service.port }}
+{{- define "safezone.ingestor.svcname" -}}
+safezone-ingestor
+{{- end }}
+
+{{- define "safezone.ingestor.url" -}}
+http://{{ include "safezone.ingestor.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.ingestor.port" . }}
+{{- end }}
+
+{{- define "safezone.analyticsAPI.port" -}}
+8003
+{{- end }}
+
+{{- define "safezone.analyticsAPI.svcname" -}}
+safezone-analytics-api
+{{- end }}
+
+{{- define "safezone.analyticsAPI.url" -}}
+http://{{ include "safezone.analyticsAPI.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.analyticsAPI.port" . }}
+{{- end }}
+
+{{- define "safezone.dashboard.port" -}}
+8004
+{{- end }}
+
+{{- define "safezone.dashboard.svcname" -}}
+safezone-dashboard
+{{- end }}
+
+{{- define "safezone.dashboard.url" -}}
+http://{{ include "safezone.dashboard.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.dashboard.port" . }}
+{{- end }}
+
+{{- define "safezone.redisSys.port" -}}
+6379
+{{- end }}
+
+{{- define "safezone.redisSys.svcname" -}}
+safezone-redis-sys-master
+{{- end }}
+
+{{- define "safezone.redisSys.accessible" -}}
+{{ include "safezone.redisSys.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.redisSys.port" . }}
+{{- end }}
+
+{{- define "safezone.redisCache.port" -}}
+6379
+{{- end }}
+
+{{- define "safezone.redisCache.svcname" -}}
+safezone-redis-cache-master
+{{- end }}
+
+{{- define "safezone.redisCache.accessible" -}}
+{{ include "safezone.redisCache.svcname" . }}.{{ include "safezone.domain" . }}.svc.cluster.local:{{ include "safezone.redisCache.port" . }}
 {{- end }}

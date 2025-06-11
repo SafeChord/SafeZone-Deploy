@@ -16,40 +16,80 @@ spec:
         app: cli-relay
     spec:
       imagePullSecrets:
-        - name: {{ .Values.global.image.pullSecret }}
+        - name: {{ .Values.image.pullSecret }}
       containers:
         - name: cli-relay
-          image: {{ .Values.global.image.repository }}/{{ .Values.image }}:{{ .Values.tag }}
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
           ports:
             - containerPort: 8000
           env:
+            - name: ENVIRONMENT
+              value: staging
+            # db_secret connection settings
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.dbSecret }}
+                  key: db_url
+            - name: REPLICA_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.dbSecret }}
+                  key: replica_url
+            # auth_secret settings
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.authSecret }}
+                  key: client_id 
+            # configMap connection settings
             - name: SIMULATOR_URL
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "safezone.fullname" . }}-config
                   key: SIMULATOR_URL
+            - name: INGESTOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: INGESTOR_URL
             - name: ANALYTICS_API_URL
               valueFrom:
                 configMapKeyRef:
                   name: {{ include "safezone.fullname" . }}-config
-                  key: ANALYTICS_URL
-            - name: DB_URL
+                  key: ANALYTICS_API_URL
+            - name: DASHBOARD_URL
               valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.global.db.dbSecret }}
-                  key: db_url
-            - name: ADMIN_EMAILS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.auth.authSecret }}
-                  key: google-oath-admin-emails
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: DASHBOARD_URL
+            - name: MKDOC_URL
+              value: "http://mkdocs:8000"
+            - name: TIME_SERVER_URL
+              value: "http://time-server:8000"
+            - name: REDIS_HOST
+              value: redis
+            # role file settings
+            - name: ROLE_FILE
+              value: {{ .Values.auth.roleFile | quote }}
+            # default app settings
             - name: SERVICE_VERSION
-              value: {{ .Values.tag | quote }}   
+              value: {{ .Values.image.tag | quote }}   
             - name: SERVICE_PORT
-              value: {{ .Values.env.port | quote }}
+              value: {{ .Values.service.port | quote }}
             - name: LOG_LEVEL
-              value: {{ .Values.env.log.level | quote }}
-            - name: LOG_FILE_SIZE
-              value: {{ .Values.env.log.file_size | quote }}
+              value: {{ .Values.service.logLevel | quote }}
+          # mounts for role file
+          volumeMounts:
+            - name: rolefile
+              mountPath: {{ .Values.auth.roleFile | quote }}
+              subPath: rolefile.yaml
+      volumes:
+        - name: rolefile
+          secret:
+            secretName: safezone-role-secrets
+            items:
+              - key: rolefile.yaml
+                path: rolefile.yaml
       affinity:
         {{- toYaml .Values.affinity | nindent 8 }}

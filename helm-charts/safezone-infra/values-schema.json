@@ -1,0 +1,30 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+      "cliRelay": {
+        "type": "object",
+        "properties": {
+          "auth": {
+            "type": "object",
+            "properties": {
+              "authSecret": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Name of the Kubernetes Secret containing Google OAuth credentials (must contain key: google-oauth-admin-emails)."
+              }
+            },
+            "required": [
+              "authSecret"
+            ]
+          }
+        },
+        "required": [
+          "auth"
+        ]
+      }
+    },
+    "required": [
+      "cliRelay"
+    ]
+  }

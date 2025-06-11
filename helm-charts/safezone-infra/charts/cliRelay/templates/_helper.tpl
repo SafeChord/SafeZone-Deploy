@@ -1,7 +1,3 @@
-{{/*
-Shared helpers for SafeZone umbrella chart
-*/}}
-
 {{- define "safezone.name" -}}
 safezone
 {{- end }}
@@ -19,6 +15,16 @@ app.kubernetes.io/name: {{ include "safezone.name" . }}-{{ .Chart.Name }}
 app.kubernetes.io/instance: {{ .Release.Name }}-{{ .Chart.Name }}
 {{- end }}
 
-{{- define "cliRelay.svcname" -}}
-{{ .Release.Name }}-addons-cli-relay
+{{/* a copy of umbrella helpers.tpl - SafeZone default ports / constants */}}
+
+{{- define "safezone.cliRelay.port" -}}
+8000
+{{- end }}
+
+{{- define "safezone.cliRelay.svcnames" -}}
+safezone-cli-relay
+{{- end }}
+
+{{- define "safezone.cliRelay.url" -}}
+http://{{ include "safezone.cliRelay.serviceName" . }}:{{ include "safezone.cliRelay.port" . }}
 {{- end }}
