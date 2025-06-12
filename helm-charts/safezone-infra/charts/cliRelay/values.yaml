@@ -9,6 +9,6 @@ auth:
   dbSecret: "" # REQUIRED: Name of the Kubernetes Secret containing database credentials
 
 service:
-  logLevel: INFO
+  logLevel: DEBUG
 
 affinity: {} # Optional: Node affinity rules for CLI Relay pods

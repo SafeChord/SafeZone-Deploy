@@ -20,10 +20,14 @@ cliRelay:
     pullSecret: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
   service:
     port: 8080  # HTTP port exposed by the CLI Relay service
-    logLevel: INFO  # Log level for CLI Relay (DEBUG, INFO, WARNING, ERROR)
+    logLevel: DEBUG  # Log level for CLI Relay (DEBUG, INFO, WARNING, ERROR)
   auth:
+    # REQUIRED: Path to the role file within the container
+    # This file defines the roles and permissions for CLI Relay operations
+    # Example: /app/roles.example.yml
+    roleFile: ""  # Path to the role file (e.g., /app/roles.example.yml)
     # REQUIRED: Name of the Kubernetes Secret containing Google OAuth credentials
-    # The secret must include the key `google-oauth-admin-emails`
+    # The secret must include the key `CLIENT_ID`
     # Google OAuth reference: https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred
     authSecret: "" 
     # REQUIRED: Name of the Kubernetes Secret containing database credentials
