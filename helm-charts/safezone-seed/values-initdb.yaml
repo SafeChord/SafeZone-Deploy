@@ -1,5 +1,5 @@
 job:
   script: "/app/scripts/jobs/init_db.sh"
 syncWave:
-  dummy: "12"
+  dummy: "11"
   job: "11"
