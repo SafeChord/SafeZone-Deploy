@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-hook-trigger
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
+data:
+  purpose: |
+    This dummy ConfigMap is created to ensure that the Argo CD application
+    is not empty after hooks are processed. This forces Argo CD's sync engine
+    to run and correctly trigger the associated Sync hooks (Jobs).
