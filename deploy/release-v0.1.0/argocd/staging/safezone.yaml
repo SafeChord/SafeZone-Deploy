@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: gitops
+  name: safezone
+spec:
+  project: safezone
+  source:
+    repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
+    targetRevision: release-v0.1.0
+    path: deploy/release-v0.1.0/argocd/staging/apps
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
