@@ -3,7 +3,8 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-hook-trigger
   annotations:
-    "helm.sh/hook-delete-policy": hook-succeeded
+    helm.sh/hook-delete-policy: hook-succeeded
+    argocd.argoproj.io/sync-wave: { .Values.syncWave.dummy | quote }
 data:
   purpose: |
     This dummy ConfigMap is created to ensure that the Argo CD application
