@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cli-relay
+  name: {{ include "safezone.cliRelay.basename" . }}
   labels:
-    {{- include "cliRelay.selectorLabels" . | nindent 4 }}
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
     app: cli-relay
 spec:
   selector:
@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "cliRelay.selectorLabels" . | nindent 8 }}
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
         app: cli-relay
     spec:
       imagePullSecrets:
@@ -46,22 +46,22 @@ spec:
             - name: SIMULATOR_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "safezone.fullname" . }}-config
+                  name: {{ include "fullname" . }}-config
                   key: SIMULATOR_URL
             - name: INGESTOR_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "safezone.fullname" . }}-config
+                  name: {{ include "fullname" . }}-config
                   key: INGESTOR_URL
             - name: ANALYTICS_API_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "safezone.fullname" . }}-config
+                  name: {{ include "fullname" . }}-config
                   key: ANALYTICS_API_URL
             - name: DASHBOARD_URL
               valueFrom:
                 configMapKeyRef:
-                  name: {{ include "safezone.fullname" . }}-config
+                  name: {{ include "fullname" . }}-config
                   key: DASHBOARD_URL
             - name: MKDOC_URL
               value: "http://mkdocs:8000"
@@ -76,7 +76,7 @@ spec:
             - name: SERVICE_VERSION
               value: {{ .Values.image.tag | quote }}   
             - name: SERVICE_PORT
-              value: {{ .Values.service.port | quote }}
+              value: "8000"
             - name: LOG_LEVEL
               value: {{ .Values.service.logLevel | quote }}
           # mounts for role file

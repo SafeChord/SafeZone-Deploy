@@ -1,7 +1,7 @@
 🚀 SafeZone 部署完成！
 
 📍 共用設定 ConfigMap：
-  {{ include "safezone.fullname" . }}-config
+  {{ include "fullname" . }}-config
 
 🌐 您已啟用 Ingress，請透過以下網址存取服務：
 
