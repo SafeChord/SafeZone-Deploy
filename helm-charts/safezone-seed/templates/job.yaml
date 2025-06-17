@@ -7,7 +7,7 @@ metadata:
   annotations:
     argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
-    argocd.argoproj.io/sync-wave: { .Values.syncWave.job | quote }
+    argocd.argoproj.io/sync-wave: {{ .Values.syncWave.job }}
 spec:
   backoffLimit: 1
   template:
