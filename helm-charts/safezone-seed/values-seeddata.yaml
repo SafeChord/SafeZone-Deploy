@@ -3,5 +3,5 @@ job:
 env:
   relayTimeout: 5400
 syncWave:
-  dummy: 32
-  job: 31
+  dummy: "32"
+  job: "31"
