@@ -2,18 +2,17 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: gitops
-  name: safezone-infra-seed
+  name: safezone-core
   annotations:
-    argocd.argoproj.io/sync-wave: "1"
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   project: safezone
   source:
     repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
     targetRevision: release-v0.1.0
-    path: helm-charts/safezone-seed
+    path: helm-charts/safezone-core
     helm:
       valueFiles:
-        - values-initdb.yaml
         - values-custom.yaml
   destination:
     server: https://kubernetes.default.svc
