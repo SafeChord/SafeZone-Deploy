@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.analyticsAPI.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: analytics-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-api
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: analytics-api
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.image.pullSecret }}
+      containers:
+        - name: analytics-api
+          image: {{ .Values.analyticsAPI.image }}:{{ .Values.analyticsAPI.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.db.dbSecret }}
+                  key: replica_url    
+            - name: SERVICE_VERSION
+              value: {{ .Values.analyticsAPI.tag | quote }}   
+            - name: SERVICE_PORT
+              value: "8000"
+            - name: LOG_LEVEL
+              value: {{ .Values.analyticsAPI.env.log.level | quote }}
+            - name: LOG_FILE_SIZE
+              value: {{ .Values.analyticsAPI.env.log.file_size | quote }}
+      affinity:
+        {{- toYaml .Values.analyticsAPI.affinity | nindent 8 }}
