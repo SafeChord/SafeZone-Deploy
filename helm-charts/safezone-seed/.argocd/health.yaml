@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ResourceHealth
+spec:
+  resourceMatchers:
+    - group: batch
+      kind: Job
+      script: |
+        hs = {}
+        if obj.status ~= nil then
+          if obj.status.failed ~= nil and obj.status.failed > 0 then
+            hs.status = "Degraded"
+            hs.message = "Job failed"
+            return hs
+          end
+          if obj.status.succeeded ~= nil and obj.status.succeeded > 0 then
+            hs.status = "Healthy"
+            hs.message = "Job completed successfully"
+            return hs
+          end
+          if obj.status.active ~= nil and obj.status.active > 0 then
+            hs.status = "Progressing"
+            hs.message = "Job is still running"
+            return hs
+          end
+        end
+        hs.status = "Unknown"
+        hs.message = "Job status unknown"
+        return hs
