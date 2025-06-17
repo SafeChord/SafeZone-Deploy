@@ -1,10 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: infra-seed-db-init
+  name: {{ .Release.Name }}
   labels:
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
 spec:
   backoffLimit: 1
   template:
@@ -15,7 +14,6 @@ spec:
       containers:
         - name: cli-db-init
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: IfNotPresent
           command: 
             - bash
             - {{ .Values.job.script }}
@@ -29,7 +27,7 @@ spec:
             - name: RELAY_URL
               valueFrom:
                 configMapKeyRef:
-                  name: safezone-infra-safezone-config
+                  name: {{ include "fullname" . }}-config
                   key:  CLI_RELAY_URL
             - name: CLIENT_ID
               valueFrom:
