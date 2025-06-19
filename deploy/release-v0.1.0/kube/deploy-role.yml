@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: safezone-ci-sa
+  namespace: gitops
+---
+# 權限 1：Application CRD 完全控制
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-crd-role
+  namespace: gitops
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-app-crd
+  namespace: gitops
+subjects:
+  - kind: ServiceAccount
+    name: safezone-ci-sa
+    namespace: gitops
+roleRef:
+  kind: Role
+  name: app-crd-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# 權限 2：safezone 只要讀 job 狀態
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-jobs-role
+  namespace: safezone
+rules:
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-read-jobs
+  namespace: safezone
+subjects:
+  - kind: ServiceAccount
+    name: safezone-ci-sa
+    namespace: gitops
+roleRef:
+  kind: Role
+  name: read-jobs-role
+  apiGroup: rbac.authorization.k8s.io
