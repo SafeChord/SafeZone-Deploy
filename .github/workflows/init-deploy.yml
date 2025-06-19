@@ -1,0 +1,78 @@
+name: local act workflow for release branch
+
+on:
+  push:
+    branches:
+      - release*
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # - name: Install CLI tools
+      #   run: |
+      #     set -e
+      #     export KUBECTL_VERSION="v1.32"
+      #     curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      #     sudo chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+      #     echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+      #     sudo chmod 644 /etc/apt/sources.list.d/kubernetes.list
+      #     sudo apt-get update
+      #     sudo apt-get install -y kubectl
+        
+      #     # 預留 yq/argocd 安裝
+      #     # sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/download/v4.40.5/yq_linux_amd64 && sudo chmod +x /usr/local/bin/yq
+      #     # curl -sSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+      #     # sudo install -m 555 argocd /usr/local/bin/argocd
+
+      # - name: Create kubeconfig file
+      #   run: |
+      #     set -e
+      #     mkdir -p ~/.kube
+      #     echo "${{ secrets.KUBE_CONFIG }}" | base64 --decode > ~/.kube/config
+      #     chmod 600 ~/.kube/config
+
+      - name: Check K8s context
+        run: kubectl config get-contexts
+
+      - name: Deploy argocd application for phase infra
+        run: |
+          set -euo pipefail
+          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra.yaml
+
+      - name: Wait 5 seconds for infra deployment
+        run: sleep 5
+
+      - name: Deploy argocd application for phase infra-seed
+        run: |
+          set -euo pipefail
+          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra-seed.yaml
+          kubectl wait --for=condition=complete --timeout=600s job/safezone-infra-seed -n safezone || (echo "Job safezone-infra-seed failed" && exit 1)
+
+      - name: Deploy argocd application for phase core
+        run: |
+          set -euo pipefail
+          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core.yaml
+
+      - name: Wait 10 seconds for core deployment
+        run: sleep 10
+
+      - name: Deploy argocd application for phase core-seed
+        run: |
+          set -euo pipefail
+          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core-seed.yaml
+          kubectl wait --for=condition=complete --timeout=5400s job/safezone-core-seed -n safezone || (echo "Job safezone-core-seed failed" && exit 1)
+
+      - name: Deploy argocd application for phase ui
+        run: |
+          set -euo pipefail
+          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-ui.yaml
+
+      - name: Wait 10 seconds for ui deployment
+        run: sleep 10
+
+      - name: Notify deployment completion
+        run: echo "Deployment completed successfully!"
