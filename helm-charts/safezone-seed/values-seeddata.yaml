@@ -2,6 +2,3 @@ job:
   script: "/app/scripts/jobs/seed_data.sh"
 env:
   relayTimeout: 5400
-syncWave:
-  dummy: "31"
-  job: "32"

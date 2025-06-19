@@ -12,7 +12,3 @@ env:
 
 job:
   script: "" # REQUIRED: Path to the seed script to run in the job container
-
-syncWave:
-  job: "" # REQUIRED: Sync wave for the job hook
-  dummy: "" # REQUIRED: Sync wave for the dummy ConfigMap hook

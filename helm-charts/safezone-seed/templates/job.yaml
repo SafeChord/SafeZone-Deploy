@@ -4,10 +4,6 @@ metadata:
   name: {{ .Release.Name }}
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
-  annotations:
-    argocd.argoproj.io/hook: Sync
-    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
-    argocd.argoproj.io/sync-wave: {{ .Values.syncWave.job }}
 spec:
   backoffLimit: 1
   template:
