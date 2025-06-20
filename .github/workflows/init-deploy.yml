@@ -58,13 +58,13 @@ jobs:
           set -euo pipefail
           kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core-seed.yaml
           
-      # - name: Wait for core-seed job Create
-      #   run: sleep 3
+      - name: Wait for core-seed job Create
+        run: sleep 3
       
-      # - name: Wait for core-seed job completion
-      #   run: |
-      #     set -euo pipefail
-      #     kubectl wait --for=condition=complete --timeout=6000s job/safezone-core-seed -n safezone || (echo "Job safezone-core-seed failed" && exit 1)
+      - name: Wait for core-seed job completion
+        run: |
+          set -euo pipefail
+          kubectl wait --for=condition=complete --timeout=6000s job/safezone-core-seed -n safezone || (echo "Job safezone-core-seed failed" && exit 1)
 
       - name: Deploy argocd application for phase ui
         run: |
