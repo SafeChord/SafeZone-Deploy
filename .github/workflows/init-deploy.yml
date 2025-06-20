@@ -1,10 +1,13 @@
-name: local act workflow for release branch
+name: workflow for release branch
 
 on:
   push:
     branches:
       - release*
-
+      - main
+      - staging
+  workflow_dispatch:
+    
 jobs:
   deploy:
     runs-on: self-hosted
