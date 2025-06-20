@@ -9,3 +9,6 @@ rolefile.yaml
 
 .dockerconfig.json
 
+.secrets
+
+*kubeconfig*
