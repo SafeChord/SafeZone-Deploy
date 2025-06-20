@@ -1,0 +1,14 @@
+# secret files
+unsealed-*
+
+# for helm debug
+rendered/
+dry_run.txt
+
+rolefile.yaml
+
+.dockerconfig.json
+
+.secrets
+
+*kubeconfig*

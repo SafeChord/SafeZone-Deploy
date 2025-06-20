@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "safezone.fullname" . }}-config
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+data:
+  SIMULATOR_URL: "{{ include "safezone.producer.simulator.url" . }}"
+  INGESTOR_URL: "{{ include "safezone.producer.ingestor.url" . }}"
+  ANALYTICS_URL: "{{ include "safezone.consumer.api.url" . }}"
+  {{- if .Values.cliRelay.enabled }}
+  CLI_RELAY_URL: "{{ include "safezone.addons.cliRelay.url" . }}"
+  {{- end }}

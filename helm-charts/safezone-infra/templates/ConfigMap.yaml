@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "fullname" . }}-config
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+data:
+  # cliRelays
+  CLI_RELAY_URL: "{{ include "safezone.cliRelay.url" . }}"
+  # simulator
+  SIMULATOR_URL: "{{ include "safezone.covidSimulator.url" . }}"
+  # ingestor
+  INGESTOR_URL: "{{ include "safezone.ingestor.url" . }}"
+  # analyticsAPI
+  ANALYTICS_API_URL: "{{ include "safezone.analyticsAPI.url" . }}"
+  # dashboard
+  DASHBOARD_URL: "{{ include "safezone.dashboard.url" . }}"
+  # redis
+  REDIS_SYS: "{{ include "safezone.redisSys.accessible" . }}"
+  REDIS_CACHE: "{{ include "safezone.redisCache.accessible" . }}"

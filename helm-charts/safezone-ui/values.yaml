@@ -1,0 +1,19 @@
+# umbrella values for the safezone project
+global:
+  # the secret for the database will be shared between all subcharts
+  # there are two keys should be set with following format in the secret
+  # - db_url: postgres://<username>:<password>@<db_host>:<db_port>/<database>
+  # - replicas_url : postgres://<username>:<password>@<replicas_host>:<db_port>/<database>
+  db:
+    dbSecret: ""
+  # the repository for all subechart images
+  image:
+    pullSecret: ""
+    repository: ""
+
+# consumer subchart contains the analytics API and dashboard
+consumer:
+  dashboard:
+    service:
+      port: 8080
+    affinity: {}

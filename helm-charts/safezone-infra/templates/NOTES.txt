@@ -1,0 +1,14 @@
+🚀 SafeZone 部署完成！
+
+📍 共用設定 ConfigMap：
+  {{ include "fullname" . }}-config
+
+🌐 您已啟用 Ingress，請透過以下網址存取服務：
+
+📊 Dashboard 入口：
+  http://{{ .Values.ingress.host }}{{ .Values.ingress.dashboard.path }}
+
+🛠️ CLI 指令入口：
+  http://{{ .Values.ingress.host }}{{ .Values.ingress.cliRelay.path }}
+
+Have a nice deploy 🍻

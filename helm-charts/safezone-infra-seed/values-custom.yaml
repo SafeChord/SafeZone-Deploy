@@ -1,0 +1,5 @@
+image:
+  pullSecret: ghcr-pull-secret
+  
+auth:
+  authSecret: safezone-auth-secrets

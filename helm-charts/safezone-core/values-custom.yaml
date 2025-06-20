@@ -1,0 +1,42 @@
+# umbrella values for the safezone project
+global:
+  db:
+    dbSecret: safezone-db-secrets
+  image:
+    repository: ghcr.io/rebodutch
+    pullSecret: ghcr-pull-secret
+
+# consumer subchart contains the analytics API and dashboard
+consumer:
+  analyticsAPI:
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
+# producer subchart contains the simulator and ingestor
+producer:
+  simulator:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
+  ingestor:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always

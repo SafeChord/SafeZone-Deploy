@@ -1,0 +1,83 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- include "producer.selectorLabels" . | nindent 2 }}
+  name: covid-simulator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covid-simulator
+  template:
+    metadata:
+      labels:
+        {{- include "producer.selectorLabels" . | nindent 8 }}
+        app: covid-simulator
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.image.pullSecret }}
+      containers:
+        - name: covid-simulator
+          image: {{ .Values.global.image.repository }}/{{ .Values.simulator.image }}:{{ .Values.simulator.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: INGESTOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "safezone.fullname" . }}-config
+                  key: INGESTOR_URL
+            - name: SERVICE_VERSION
+              value: {{ .Values.simulator.tag | quote }}   
+            - name: SERVICE_PORT
+              value: {{ .Values.simulator.env.port | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.simulator.env.log.level | quote }}
+            - name: LOG_FILE_SIZE
+              value: {{ .Values.simulator.env.log.file_size | quote }}
+      affinity:
+        {{- toYaml .Values.simulator.affinity | nindent 8 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  {{- include "producer.selectorLabels" . | nindent 2 }}
+  name: covid-ingestor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: covid-ingestor
+  template:
+    metadata:
+      labels:
+        {{- include "producer.selectorLabels" . | nindent 8 }}
+        app: covid-ingestor
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.image.pullSecret }}
+      containers:
+        - name: covid-ingestor
+          image: {{ .Values.global.image.repository }}/{{ .Values.ingestor.image }}:{{ .Values.ingestor.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.db.dbSecret | quote }}
+                  key: db_url
+            - name: SERVICE_VERSION
+              value: {{ .Values.ingestor.tag | quote }}   
+            - name: SERVICE_PORT
+              value: {{ .Values.ingestor.env.port | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.ingestor.env.log.level | quote }}
+            - name: LOG_FILE_SIZE
+              value: {{ .Values.ingestor.env.log.file_size | quote }}
+      affinity:
+        {{- toYaml .Values.ingestor.affinity | nindent 8 }}

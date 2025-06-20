@@ -1,0 +1,20 @@
+# umbrella values for the safezone project
+global:
+  db:
+    dbSecret: safezone-db-secrets
+  image:
+    repository: ghcr.io/rebodutch
+    pullSecret: ghcr-pull-secret
+
+# consumer subchart contains the analytics API and dashboard
+consumer:
+  dashboard:
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
