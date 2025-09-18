@@ -16,8 +16,10 @@ jobs:
       - name: build low privilege kube config
         run: |
           set -euo pipefail
-          bash deploy/release-v0.1.0/kube/gen_config.sh 
-        # generate kubeconfig-safezone.yaml
+          echo "Building low privilege kubeconfig for github action"
+          echo "You should have already set up your cluster with RBAC for this to work"
+          bash bootstrap/scripts/gen-kubeconfig.sh
+        # generate kubeconfig-safezone.yaml (you should apply RBAC to your cluster first)
       
       - name: set kubeconfig env to new config
         run: echo "KUBECONFIG=kubeconfig-safezone.yaml" >> $GITHUB_ENV
@@ -25,10 +27,15 @@ jobs:
       - name: Check K8s context
         run: kubectl config get-contexts
 
+      - name: Deploy secret for argocd applications
+        run: |
+          set -euo pipefail
+          kubectl apply -f deploy/staging/secrets
+
       - name: Deploy argocd application for phase infra
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra.yaml
+          kubectl apply -n gitops -f deploy/staging/apps/safezone-infra.yaml
 
       - name: Wait 5 seconds for infra deployment
         run: sleep 5
@@ -36,8 +43,8 @@ jobs:
       - name: Deploy argocd application for phase infra-seed
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra-seed.yaml
-      
+          kubectl apply -n gitops -f deploy/staging/apps/safezone-infra-seed.yaml
+
       - name: Wait for infra-seed job Create
         run: sleep 3
 
@@ -49,7 +56,7 @@ jobs:
       - name: Deploy argocd application for phase core
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core.yaml
+          kubectl apply -n gitops -f deploy/staging/apps/safezone-core.yaml
 
       - name: Wait 10 seconds for core deployment
         run: sleep 10
@@ -57,7 +64,7 @@ jobs:
       - name: Deploy argocd application for phase core-seed
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core-seed.yaml
+          kubectl apply -n gitops -f deploy/staging/apps/safezone-core-seed.yaml
           
       - name: Wait for core-seed job Create
         run: sleep 3
@@ -70,7 +77,7 @@ jobs:
       - name: Deploy argocd application for phase ui
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-ui.yaml
+          kubectl apply -n gitops -f deploy/staging/apps/safezone-ui.yaml
 
       - name: Wait 10 seconds for ui deployment
         run: sleep 10

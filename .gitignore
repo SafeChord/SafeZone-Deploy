@@ -1,4 +1,5 @@
 # secret files
+unencrypted/
 unsealed-*
 
 # for helm debug
