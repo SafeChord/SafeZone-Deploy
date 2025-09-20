@@ -1,4 +1,4 @@
-name: workflow for release branch
+name: workflow to deploy preview infrastructure to safezone-preview k8s cluster
 
 on:
   workflow_dispatch:
