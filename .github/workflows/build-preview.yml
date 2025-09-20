@@ -1,0 +1,11 @@
+name: workflow to deploy preview infrastructure to safezone-preview k8s cluster
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
