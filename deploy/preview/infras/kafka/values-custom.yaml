@@ -1,0 +1,38 @@
+volumePermissions:
+  enabled: true
+
+controller:
+  replicaCount: 1
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/tier
+                operator: In
+                values:
+                  - medium
+              - key: chorde.io/region
+                operator: In
+                values:
+                  - tw
+  persistence:
+    enabled: false
+
+broker:
+  replicaCount: 1
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/tier
+                operator: In
+                values:
+                  - medium
+              - key: chorde.io/region
+                operator: In
+                values:
+                  - tw
+  persistence:
+    enabled: false

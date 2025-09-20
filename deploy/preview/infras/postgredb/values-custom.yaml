@@ -1,0 +1,29 @@
+# you have to change architecture to replication if you want at least one replica
+# standalone or replication
+architecture: standalone
+
+readReplicas:
+  enabled: false
+
+primary:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/tier
+                operator: In
+                values:
+                  - medium
+              - key: chorde.io/region
+                operator: In
+                values:
+                  - tw
+  tolerations:
+    - key: chorde.io/provider
+      operator: Equal
+      value: local
+      effect: PreferNoSchedule
+
+auth:
+  existingSecret: postgredb-secret

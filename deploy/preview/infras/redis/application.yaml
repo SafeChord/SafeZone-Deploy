@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bitnami-redis-preview
+  namespace: gitops
+spec:
+  project: safezone
+  source:
+    repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
+    targetRevision: deploy/0.2.1
+    path: deploy/preview/infras/redis/charts/redis
+    helm:
+      valueFiles:
+        - values.yaml
+        - ../../values-custom.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: safezone-preview
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
