@@ -30,12 +30,12 @@ jobs:
           echo "Installing preview infra - redis"
           bash deploy/preview/infras/redis/install.sh
       
-      - name: Install preview infra - postgredb
+      - name: Install preview infra - postgresql
         run: |
           set -euo pipefail
-          echo "Installing preview infra - postgredb"
-          bash deploy/preview/infras/postgredb/install.sh 
-      
+          echo "Installing preview infra - postgresql"
+          bash deploy/preview/infras/postgresql/install.sh
+
       - name: Install preview infra - kafka
         run: |
           set -euo pipefail
