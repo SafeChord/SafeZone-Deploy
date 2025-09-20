@@ -26,4 +26,6 @@ primary:
       effect: PreferNoSchedule
 
 auth:
-  existingSecret: postgredb-secret
+  username: safezone-user
+  database: safezone
+  existingSecret: postgresql-secret-preview

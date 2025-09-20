@@ -4,7 +4,7 @@ metadata:
   name: safezone-ci-sa
   namespace: gitops
 ---
-# 權限 1：Application CRD 完全控制
+# Permission 1: Full control of Application CRD
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -29,7 +29,7 @@ roleRef:
   name: app-crd-role
   apiGroup: rbac.authorization.k8s.io
 ---
-# 權限 2：safezone 只要讀 job 狀態
+# Permission 2: Read job status
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:

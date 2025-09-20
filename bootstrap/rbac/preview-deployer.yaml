@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: safezone-preview-ci-sa
+  namespace: gitops
+---
+# Permission 1: Full control of Application CRD
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: app-crd-role
+  namespace: gitops
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources: ["applications"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-app-crd
+  namespace: gitops
+subjects:
+  - kind: ServiceAccount
+    name: safezone-preview-ci-sa
+    namespace: gitops
+roleRef:
+  kind: Role
+  name: app-crd-role
+  apiGroup: rbac.authorization.k8s.io
+---

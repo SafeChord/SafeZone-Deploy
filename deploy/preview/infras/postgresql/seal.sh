@@ -7,4 +7,4 @@ kubeseal --controller-name=sealed-secrets \
          --controller-namespace=kube-system \
          --format yaml \
          < $SCRIPT_DIR/unsealed-secret.yaml \
-         > $SCRIPT_DIR/postgredb-sealed-secrets.yaml
+         > $SCRIPT_DIR/postgresql-sealed-secrets.yaml
