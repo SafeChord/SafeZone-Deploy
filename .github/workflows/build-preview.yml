@@ -8,4 +8,54 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          recursive: true
+
+      - name: install kubenetes serviceaccount
+        run: |
+          set -euo pipefail
+          echo "Installing kubernetes serviceaccount for github action"
+          kubectl apply -f bootstrap/rbac/preview-deployer.yaml
+        
+      - name: build low privilege kube config
+        run: |
+          set -euo pipefail
+          echo "Building low privilege kubeconfig for github action"
+          bash bootstrap/scripts/gen-kubeconfig.sh safezone-preview
+      
+      - name: set kubeconfig env to new config
+        run: echo "KUBECONFIG=kubeconfig-safezone-preview.yaml" >> $GITHUB_ENV
+
+      - name: Check K8s context
+        run: kubectl config get-contexts
+       
+      - name: Install preview infra - redis
+        run: |
+          set -euo pipefail
+          echo "Installing preview infra - redis"
+          bash deploy/preview/infras/redis/install.sh
+      
+      - name: Install preview infra - postgredb
+        run: |
+          set -euo pipefail
+          echo "Installing preview infra - postgredb"
+          bash deploy/preview/infras/postgredb/install.sh 
+      
+      - name: Install preview infra - kafka
+        run: |
+          set -euo pipefail
+          echo "Installing preview infra - kafka"
+          bash deploy/preview/infras/kafka/install.sh
+      
+      # cleanup
+      - name: uninstall kubenetes serviceaccount
+        if: always()
+        run: |
+          set -euo pipefail
+          echo "Uninstalling kubernetes serviceaccount for github action"
+          kubectl delete -f bootstrap/rbac/preview-deployer.yaml
+      
+      - name: Clean up kubeconfig
+        if: always()
+        run: rm -f kubeconfig-safezone-preview.yaml
