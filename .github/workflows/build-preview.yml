@@ -11,12 +11,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           recursive: true
-
-      - name: install kubenetes serviceaccount
-        run: |
-          set -euo pipefail
-          echo "Installing kubernetes serviceaccount for github action"
-          kubectl apply -f bootstrap/rbac/preview-deployer.yaml
         
       - name: build low privilege kube config
         run: |
@@ -48,14 +42,7 @@ jobs:
           echo "Installing preview infra - kafka"
           bash deploy/preview/infras/kafka/install.sh
       
-      # cleanup
-      - name: uninstall kubenetes serviceaccount
-        if: always()
-        run: |
-          set -euo pipefail
-          echo "Uninstalling kubernetes serviceaccount for github action"
-          kubectl delete -f bootstrap/rbac/preview-deployer.yaml
-      
+      # cleanup      
       - name: Clean up kubeconfig
         if: always()
         run: rm -f kubeconfig-safezone-preview.yaml
