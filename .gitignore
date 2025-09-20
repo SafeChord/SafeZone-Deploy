@@ -2,6 +2,9 @@
 unencrypted/
 unsealed-*
 
+# local files
+*.local*
+
 # for helm debug
 rendered/
 dry_run.txt
@@ -12,4 +15,4 @@ rolefile.yaml
 
 .secrets
 
-*kubeconfig*
+kubeconfig*.yaml
