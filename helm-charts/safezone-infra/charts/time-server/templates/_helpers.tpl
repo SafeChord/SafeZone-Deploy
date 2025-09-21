@@ -96,6 +96,20 @@ http://{{ include "safezone.analyticsAPI.basename" . }}.{{include "safezone.svc.
 http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.dashboard.port" . }}
 {{- end }}
 
+{{/* System Redis */}}
+
+{{- define "safezone.redisSys.port" -}}
+6379
+{{- end }}
+
+{{- define "safezone.redisSys.basename" -}}
+{{ include "fullname" . }}-redis-sys
+{{- end }}
+
+{{- define "safezone.redisSys.accessible" -}}
+{{ include "safezone.redisSys.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.redisSys.port" . }}
+{{- end }}
+
 {{/* Cache Redis */}}
 
 {{- define "safezone.redisCache.port" -}}

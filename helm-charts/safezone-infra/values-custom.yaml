@@ -1,57 +1,55 @@
-redis-sys:
-  auth:
-    existingSecret: safezone-redis-sys-secret
-  master:
-    persistence:
-      accessModes:
-        - ReadWriteMany
-      size: 1Gi
-      storageClass: local-nfs
-    affinity: 
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-              - key: kubernetes.io/local-backbone
-                operator: In
-                values:
-                  - true
 redis-cache:
   auth:
-    existingSecret: safezone-redis-cache-secret
+    existingSecret: cache-secret
+    ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
+    ## NOTE: ignored unless `auth.existingSecret` parameter is set
+
   master:
-    affinity: 
+    affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
             - matchExpressions:
-              - key: kubernetes.io/local-backbone
-                operator: In
-                values:
-                  - true
-
-cliRelay:
+                - key: chorde.io/avail
+                  operator: In
+                  values:
+                    - always
+cli-relay:
   image:
     pullSecret: ghcr-pull-secret
   auth:
     roleFile: /app/roles.yml
     dbSecret: safezone-db-secrets
     authSecret: safezone-auth-secrets
-  affinity: 
+  affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
           - matchExpressions:
-            - key: chorde.io/avail
-              operator: In
-              values: 
-              - always
+              - key: chorde.io/avail
+                operator: In
+                values:
+                  - always
+
+time-server:
+  image:
+    pullSecret: ghcr-pull-secret
+  auth:
+    redisSecret: safezone-redis-secrets
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values:
+                  - always
 
 ingress:
-  className: nginx-public 
+  className: nginx-public
   host: safezone.omh.idv.tw
   dashboard:
-    path: /dashboard 
+    path: /dashboard
   cliRelay:
     path: /cli
-  

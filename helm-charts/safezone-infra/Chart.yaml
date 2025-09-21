@@ -2,16 +2,16 @@ apiVersion: v2
 name: safezone-infra
 description: Umbrella chart for SafeZone project at phase infracture
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.2.1
+appVersion: 0.2.1
 
 dependencies:
-- name: cliRelay
-  version: 0.1.0
-  repository: "file://charts/cliRelay"
-# - name: redis-sys
-#   version: 20.13.4
-#   repository: "file://charts/redis-sys"
-# - name: redis-cache
-#   version: 20.13.4
-#   repository: "file://charts/redis-cache"
+- name: cli-relay
+  version: 0.2.1
+  repository: "file://charts/cli-relay"
+- name: time-server
+  version: 0.2.1
+  repository: "file://charts/time-server"
+- name: redis-cache
+  version: 20.13.4
+  repository: "file://charts/redis-cache"

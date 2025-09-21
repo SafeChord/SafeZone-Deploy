@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema#",
   "type": "object",
   "properties": {
-    "cliRelay": {
+    "cli-relay": {
       "type": "object",
       "properties": {
         "image": {
@@ -35,7 +35,33 @@
         }
       },
       "required": ["image", "auth"]
+    },
+    "time-server": {
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "object",
+          "properties": {
+            "pullSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["pullSecret"]
+        },
+        "auth": {
+          "type": "object",
+          "properties": {
+            "redisSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["redisSecret"]
+        }
+      },
+      "required": ["image", "auth"]
     }
   },
-  "required": ["cliRelay"]
+  "required": ["cli-relay"]
 }

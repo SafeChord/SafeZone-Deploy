@@ -16,5 +16,4 @@ data:
   # dashboard
   DASHBOARD_URL: "{{ include "safezone.dashboard.url" . }}"
   # redis
-  REDIS_SYS: "{{ include "safezone.redisSys.accessible" . }}"
   REDIS_CACHE: "{{ include "safezone.redisCache.accessible" . }}"

@@ -3,24 +3,24 @@
 # The Ingress resource allows you to define rules for routing external traffic to the appropriate services based on the request's host and path.
 # ----------------------------------
 ingress:
-  className: traefik  # Ingress class name (e.g., traefik, nginx)
+  className: ""  # Ingress class name (e.g., traefik, nginx)
   host: ""  # Host for SafeZone ingress (e.g., safezone.example.com)
   dashboard:
     path: /dashboard  # Path for the dashboard ingress
-  cliRelay:
+  cli-relay:
     path: /cli  # Path for the CLI Relay ingress
 
 # ---------------------------------
-# cliRelay is a service that acts as a relay for command-line interface (CLI) requests.
+# cli-relay is a service that acts as a relay for command-line interface (CLI) requests.
 # It is designed to work with the SafeZone project and provides a way to interact with the system through CLI commands.
-# cliRelay references: https://github.com/rebodutch/SafeZone/blob/staging/tools/cli/README.md
+# cli-relay references: https://github.com/rebodutch/SafeZone/blob/staging/tools/cli/README.md
 # ---------------------------------
-cliRelay:
+cli-relay:
   image:
     pullSecret: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
   service:
     port: 8080  # HTTP port exposed by the CLI Relay service
-    logLevel: DEBUG  # Log level for CLI Relay (DEBUG, INFO, WARNING, ERROR)
+    logLevel: INFO  # Log level for CLI Relay (DEBUG, INFO, WARNING, ERROR)
   auth:
     # REQUIRED: Path to the role file within the container
     # This file defines the roles and permissions for CLI Relay operations
@@ -36,31 +36,20 @@ cliRelay:
     dbSecret: ""
   affinity: {}  # Optional: Node affinity rules for CLI Relay pods
 
-
 # -------------------------------
-# Redis instance for system control plane (used by CLI Relay, Init Job, etc.)
-# Stores low-volume system-level data like phase state, deployment flags
-# -------------------------------
-redis-sys:
-  # Override the full name of the Redis cache instance
-  fullnameOverride: "safezone-redis-sys"
-
-  # Customized for this project: standalone Redis without replica
-  architecture: standalone
-  replica:
-    enabled: false
-
+# time-server is a service that provides accurate time synchronization for devices within the SafeZone network.
+# It is an fastapi server that provides a only way to get system time(maybe mock time) through HTTP API.
+# time-server references: https://github.com/rebodutch/SafeZone/tree/main/tools/time-server/README.md
+# ---------------------------------
+time-server:
+  image:
+    pullSecret: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
+  service:
+    port: 8000 # HTTP port exposed by the time server service
+    logLevel: INFO # Log level for time server (DEBUG, INFO, WARNING, ERROR
   auth:
-    # REQUIRED: Name of the existing Kubernetes Secret containing the Redis password
-    # The secret must include the key `redis-password`
-    # Reference: https://redis.io/docs/management/security/security-redis-password/
-    # If not set, the Bitnami Redis chart will generate a random password automatically
-    existingSecret: ""  
-  master:
-    persistence:
-      # Persistent volume for Redis-sys master
-      enabled: true
-    affinity: {}  # Optional: Node affinity rules for Redis-sys master pods
+    redisSecret: "" # REQUIRED: Name of the Kubernetes Secret containing Redis credentials
+  affinity: {}  # Optional: Node affinity rules for time server pods
 
 # -------------------------------
 # Redis instance for caching service-layer data (used by APIs, dashboard, etc.)
@@ -74,7 +63,6 @@ redis-cache:
   architecture: standalone
   replica:
     enabled: false
-
   auth:
     # REQUIRED: Name of the existing Kubernetes Secret containing the Redis password
     # The secret must include the key `redis-password`
@@ -82,6 +70,7 @@ redis-cache:
     # If not set, the Bitnami Redis chart will generate a random password automatically
     existingSecret: ""  
   master:
+    # @param master.persistence.enabled Enable Redis&reg; master persistence using PVC
     persistence:
-      enabled: false
+      enabled: false # only for cache use cases， set to false to avoid unnecessary disk usage
     affinity: {}  # Optional: Node affinity rules for Redis-cache master pods
