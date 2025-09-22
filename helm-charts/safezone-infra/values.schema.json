@@ -29,12 +29,30 @@
             "dbSecret": {
               "type": "string",
               "minLength": 1
+            },
+            "redisSecret": {
+              "type": "string",
+              "minLength": 1
+            },
+            "cacheSecret": {
+              "type": "string",
+              "minLength": 1
             }
           },
-          "required": ["roleFile", "authSecret", "dbSecret"]
+          "required": ["roleFile", "authSecret", "dbSecret", "redisSecret", "cacheSecret"]
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "environment": {
+              "type": "string",
+              "enum": ["production", "staging", "development"]
+            }
+          },
+          "required": ["environment"]
         }
       },
-      "required": ["image", "auth"]
+      "required": ["image", "auth", "service"]
     },
     "time-server": {
       "type": "object",
@@ -61,7 +79,23 @@
         }
       },
       "required": ["image", "auth"]
+    },
+    "redis-cache": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "existingSecret": {
+            "redisSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["existingSecret"]
+        }
+      },
+      "required": ["auth"]
     }
   },
-  "required": ["cli-relay"]
+  "required": ["cli-relay", "time-server", "redis-cache"]
 }

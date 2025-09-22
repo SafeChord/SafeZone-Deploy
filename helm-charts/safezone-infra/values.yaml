@@ -34,6 +34,14 @@ cli-relay:
     # The secret must include the key `db_url` (example: postgres://user:password@host:port/dbname)
     # Database reference: https://www.postgresql.org/docs/current/auth-methods.html
     dbSecret: ""
+    # REQUIRED: Name of the Kubernetes Secret containing Redis credentials
+    # The secret must include the keys `redis_host`, `redis_port`, and `redis_password`
+    # Redis reference: https://redis.io/docs/management/security/security-best-practices/
+    redisSecret: ""
+    # REQUIRED: Name of the Kubernetes Secret containing cache (Redis) credentials
+    # The secret must include the key `cache_password`
+    # Cache (Redis) reference: https://redis.io/docs/management/security/security-redis-password/
+    cacheSecret: ""
   affinity: {}  # Optional: Node affinity rules for CLI Relay pods
 
 # -------------------------------

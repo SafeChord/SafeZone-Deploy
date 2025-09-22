@@ -1,6 +1,6 @@
 redis-cache:
   auth:
-    existingSecret: cache-secret
+    existingSecret: safezone-cache-secrets
     ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
     ## NOTE: ignored unless `auth.existingSecret` parameter is set
 
@@ -19,8 +19,12 @@ cli-relay:
     pullSecret: ghcr-pull-secret
   auth:
     roleFile: /app/roles.yml
-    dbSecret: safezone-db-secrets
+    dbSecret: k3han-db-secrets
+    redisSecret: k3han-redis-secrets
     authSecret: safezone-auth-secrets
+    cacheSecret: safezone-cache-secrets
+  service:
+    environment: staging
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -35,7 +39,7 @@ time-server:
   image:
     pullSecret: ghcr-pull-secret
   auth:
-    redisSecret: safezone-redis-secrets
+    redisSecret: k3han-redis-secrets
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

@@ -15,5 +15,10 @@ data:
   ANALYTICS_API_URL: "{{ include "safezone.analyticsAPI.url" . }}"
   # dashboard
   DASHBOARD_URL: "{{ include "safezone.dashboard.url" . }}"
-  # redis
-  REDIS_CACHE: "{{ include "safezone.redisCache.accessible" . }}"
+  # timeServer
+  TIME_SERVER_URL: "{{ include "safezone.timeServer.url" . }}"
+  # redis-cache
+  REDIS_CACHE_HOST: "{{ include "safezone.redisCache.host" . }}"
+  REDIS_CACHE_PORT: "{{ include "safezone.redisCache.port" . }}"
+  # mkdoc
+  MKDOC_URL: "{{ include "safezone.mkdoc.url" . }}"
