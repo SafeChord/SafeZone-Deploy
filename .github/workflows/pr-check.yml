@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           CHART_PATH="helm-charts/safezone-${{ steps.extract_chart.outputs.chart_name }}"
           echo "Linting chart at: $CHART_PATH"
-          helm lint $CHART_PATH
+          helm lint $CHART_PATH -f "${CHART_PATH}/values-custom.yaml"
 
       - name: Helm Dry-Run Validation
         run: |
