@@ -24,7 +24,7 @@ spec:
             - containerPort: 8000
           env:
             - name: ENVIRONMENT
-              value: staging
+              value: {{ .Values.service.environment | quote }}
             # db_secret connection settings
             - name: DB_URL
               valueFrom:
@@ -36,6 +36,40 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.auth.dbSecret }}
                   key: replica_url
+            # redis_secret connection settings
+            - name: REDIS_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.redisSecret }}
+                  key: redis_host
+            - name: REDIS_PORT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.redisSecret }}
+                  key: redis_port
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.redisSecret }}
+                  key: redis_password
+            - name: REDIS_DB
+              value: "0"            
+            # cache_secret connection setting
+            - name: CACHE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: REDIS_CACHE_HOST
+            - name: CACHE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: REDIS_CACHE_PORT
+            - name: CACHE_PASSWORD
+              valueFrom:  
+                secretKeyRef:
+                  name: {{ .Values.auth.cacheSecret }}
+                  key: redis-password
             # auth_secret settings
             - name: CLIENT_ID
               valueFrom:
@@ -64,11 +98,15 @@ spec:
                   name: {{ include "fullname" . }}-config
                   key: DASHBOARD_URL
             - name: MKDOC_URL
-              value: "http://mkdocs:8000"
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: MKDOC_URL
             - name: TIME_SERVER_URL
-              value: "http://time-server:8000"
-            - name: REDIS_HOST
-              value: redis
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: TIME_SERVER_URL
             # role file settings
             - name: ROLE_FILE
               value: {{ .Values.auth.roleFile | quote }}

@@ -96,20 +96,6 @@ http://{{ include "safezone.analyticsAPI.basename" . }}.{{include "safezone.svc.
 http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.dashboard.port" . }}
 {{- end }}
 
-{{/* System Redis */}}
-
-{{- define "safezone.redisSys.port" -}}
-6379
-{{- end }}
-
-{{- define "safezone.redisSys.basename" -}}
-{{ include "fullname" . }}-redis-sys
-{{- end }}
-
-{{- define "safezone.redisSys.accessible" -}}
-{{ include "safezone.redisSys.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.redisSys.port" . }}
-{{- end }}
-
 {{/* Cache Redis */}}
 
 {{- define "safezone.redisCache.port" -}}
@@ -120,8 +106,8 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{ include "fullname" . }}-redis-cache
 {{- end }}
 
-{{- define "safezone.redisCache.accessible" -}}
-{{ include "safezone.redisCache.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.redisCache.port" . }}
+{{- define "safezone.redisCache.host" -}}
+{{ include "safezone.redisCache.basename" . }}.{{include "safezone.svc.postfix" . }}
 {{- end }}
 
 {{/* Time Server */}}
@@ -135,7 +121,7 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{- end }}
 
 {{- define "safezone.timeServer.url" -}}
-{{ include "safezone.timeServer.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.timeServer.port" . }}
+http://{{ include "safezone.timeServer.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.timeServer.port" . }}
 {{- end }}
 
 
@@ -150,5 +136,5 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{- end }}
 
 {{- define "safezone.mkdoc.url" -}}
-{{ include "safezone.mkdoc.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.mkdoc.port" . }}
+http://{{ include "safezone.mkdoc.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.mkdoc.port" . }}
 {{- end }}

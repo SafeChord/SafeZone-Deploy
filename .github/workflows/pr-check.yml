@@ -1,0 +1,62 @@
+name: "PR Check: Helm Lint and Dry-Run (Dynamic)"
+
+on:
+  pull_request:
+    branches:
+      - 'deploy/**'
+    paths:
+      - 'helm-charts/**'
+
+jobs:
+ lint-and-validate:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract Chart Name from Branch
+        id: extract_chart
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          CHART_AND_VERSION="${BRANCH_NAME#*/}"
+          CHART_NAME="${CHART_AND_VERSION%-*}"
+          echo "Detected chart name: $CHART_NAME"
+          echo "chart_name=$CHART_NAME" >> $GITHUB_OUTPUT
+
+      - name: Helm Lint
+        run: |
+          set -euo pipefail
+          CHART_PATH="helm-charts/safezone-${{ steps.extract_chart.outputs.chart_name }}"
+          echo "Linting chart at: $CHART_PATH"
+          helm lint $CHART_PATH
+
+      - name: Helm Dry-Run Validation
+        run: |
+          set -euo pipefail
+          CHART_NAME="safezone-${{ steps.extract_chart.outputs.chart_name }}"
+          CHART_PATH="./helm-charts/${CHART_NAME}"
+          echo "Performing Helm template for chart: $CHART_PATH"
+          helm template $CHART_NAME $CHART_PATH \
+            -f "${CHART_PATH}/values-custom.yaml" \
+            --namespace safezone-preview
+
+      - name: Send Slack Notification
+        uses: slackapi/slack-github-action@v1.26.0
+        with:
+          # 在訊息中，可以動態地放入 PR 連結、commit SHA、狀態等
+          payload: |
+            {
+              "text": "PR Check for `${{ github.event.pull_request.html_url }}` has finished.",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "PR Check for <${{ github.event.pull_request.html_url }}|#${{ github.event.pull_request.number }}> has finished with status: `${{ needs.lint-and-validate.result }}`"
+                  }
+                }
+              ]
+            }
+        env:
+          # 從 GitHub Secrets 讀取 Webhook URL
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
