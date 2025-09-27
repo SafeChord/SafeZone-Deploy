@@ -79,23 +79,7 @@
         }
       },
       "required": ["image", "auth"]
-    },
-    "redis-cache": {
-      "type": "object",
-      "properties": {
-        "auth": {
-          "type": "object",
-          "existingSecret": {
-            "redisSecret": {
-              "type": "string",
-              "minLength": 1
-            }
-          },
-          "required": ["existingSecret"]
-        }
-      },
-      "required": ["auth"]
     }
   },
-  "required": ["cli-relay", "time-server", "redis-cache"]
+  "required": ["cli-relay", "time-server"]
 }

@@ -1,4 +1,5 @@
 job:
-  script: "/app/scripts/jobs/seed_data.sh"
+  name: "seed-data-job"
+  script: "seed_data.sh"
 env:
-  relayTimeout: 5400
+  relayTimeout: 5400 # set a longer timeout for seeding job

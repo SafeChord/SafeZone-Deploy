@@ -1,6 +1,6 @@
 apiVersion: v2
-name: safezone-infra-seed
-description: Chart for SafeZone project at phase infra-seed, which is used to initialize database.
+name: safezone-seed
+description: Chart for seeding Job in SafeZone project
 type: application
-version: 0.1.0
-appVersion: "1.0.0"
+version: 0.2.1
+appVersion: "0.2.1"

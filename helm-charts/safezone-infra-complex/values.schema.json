@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "redis-cache": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "existingSecret": {
+            "redisSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["existingSecret"]
+        }
+      },
+      "required": ["auth"]
+    }
+  },
+  "required": ["redis-cache"]
+}

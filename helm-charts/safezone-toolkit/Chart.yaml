@@ -1,0 +1,14 @@
+apiVersion: v2
+name: safezone-toolkit
+description: Umbrella chart for toolkit in SafeZone project at development phase infrastructure
+type: application
+version: 0.2.1
+appVersion: 0.2.1
+
+dependencies:
+- name: cli-relay
+  version: 0.2.1
+  repository: "file://charts/cli-relay"
+- name: time-server
+  version: 0.2.1
+  repository: "file://charts/time-server"

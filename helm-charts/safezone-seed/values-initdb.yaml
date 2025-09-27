@@ -1,2 +1,3 @@
 job:
-  script: "/app/scripts/jobs/init_db.sh"
+  name: "database-init-job"
+  script: "init_db.sh"

@@ -12,14 +12,18 @@ spec:
         - name: {{ .Values.image.pullSecret }}
       restartPolicy: Never
       containers:
-        - name: cli-db-init
+        - name: {{ .Values.job.name}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           command: 
             - bash
-            - {{ .Values.job.script }}
+            - "/scripts/{{ .Values.job.script }}"
+          volumeMounts:
+            - name: scripts-volume
+              mountPath: /scripts
+              readOnly: true
           env:
             - name: ENVIRONMENT
-              value: staging
+              value: {{ .Values.env.environment | quote }}
             - name: RELAY_TIMEOUT
               value: {{ .Values.env.relayTimeout | quote }}
             - name: TOKEN_FILE
@@ -44,3 +48,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.auth.authSecret }}
                   key: refresh_token
+      volumes:
+        - name: scripts-volume
+          configMap:
+            name: safezone-job-scripts
+            defaultMode: 0755

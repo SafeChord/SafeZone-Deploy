@@ -1,58 +1,6 @@
-redis-cache:
-  auth:
-    existingSecret: safezone-cache-secrets
-    ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
-    ## NOTE: ignored unless `auth.existingSecret` parameter is set
-
-  master:
-    affinity:
-      nodeAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          nodeSelectorTerms:
-            - matchExpressions:
-                - key: chorde.io/avail
-                  operator: In
-                  values:
-                    - always
-cli-relay:
-  image:
-    pullSecret: ghcr-pull-secret
-  auth:
-    roleFile: /app/roles.yml
-    dbSecret: k3han-db-secrets
-    redisSecret: k3han-redis-secrets
-    authSecret: safezone-auth-secrets
-    cacheSecret: safezone-cache-secrets
-  service:
-    environment: staging
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: chorde.io/avail
-                operator: In
-                values:
-                  - always
-
-time-server:
-  image:
-    pullSecret: ghcr-pull-secret
-  auth:
-    redisSecret: k3han-redis-secrets
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: chorde.io/avail
-                operator: In
-                values:
-                  - always
-
 ingress:
   className: nginx-public
-  host: safezone.omh.idv.tw
+  host: safezone.omh.idv.tw/preview
   dashboard:
     path: /dashboard
   cliRelay:

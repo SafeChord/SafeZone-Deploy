@@ -11,14 +11,14 @@ spec:
   project: safezone
   source:
     repoURL: https://github.com/rebodutch/SafeZone-Deploy.git
-    targetRevision: release-v0.1.0
+    targetRevision: deploy/0.2.1
     path: helm-charts/safezone-core
     helm:
       valueFiles:
         - values-custom.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: safezone
+    namespace: safezone-preview
   syncPolicy:
     automated:
       prune: true
