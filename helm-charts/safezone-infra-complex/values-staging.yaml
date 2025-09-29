@@ -14,3 +14,11 @@ redis-cache:
                   operator: In
                   values:
                     - always
+
+ingress:
+  className: nginx-public
+  host: safezone.omh.idv.tw
+  dashboard:
+    path: /dashboard
+  cliRelay:
+    path: /cli

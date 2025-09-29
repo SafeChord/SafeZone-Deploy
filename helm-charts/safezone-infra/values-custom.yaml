@@ -1,7 +1,0 @@
-ingress:
-  className: nginx-public
-  host: safezone.omh.idv.tw/preview
-  dashboard:
-    path: /dashboard
-  cliRelay:
-    path: /cli
