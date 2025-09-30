@@ -1,24 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "fullname" . }}-ingress-rewrite
+  name: {{ include "fullname" . }}-ingress
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
+    {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
   annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/router.entrypoints: web
+    nginx.ingress.kubernetes.io/proxy-body-size: "20m"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          - path: {{ .Values.ingress.cliRelay.path }}(/|$)(.*)
+          - path: {{ .Values.ingress.dashboard.path }}
             pathType: ImplementationSpecific
             backend:
               service:
-                name: "{{ include "safezone.cliRelay.basename" . }}"
+                name: "{{ include "safezone.dashboard.basename" . }}"
                 port:
-                  name: http   
- 
-
+                  name: http

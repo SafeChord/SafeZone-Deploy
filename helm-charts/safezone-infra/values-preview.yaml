@@ -33,3 +33,28 @@ time-server:
                 operator: In
                 values:
                   - always
+
+redis-cache:
+  auth:
+    existingSecret: safezone-cache-secrets
+    ## @param auth.existingSecretPasswordKey Password key to be retrieved from existing secret
+    ## NOTE: ignored unless `auth.existingSecret` parameter is set
+
+  master:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: chorde.io/avail
+                  operator: In
+                  values:
+                    - always
+
+ingress:
+  className: nginx-public
+  host: safezone.omh.idv.tw
+  dashboard:
+    path: /preview/dashboard
+  cliRelay:
+    path: /preview/cli

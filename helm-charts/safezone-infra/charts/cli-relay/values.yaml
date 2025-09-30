@@ -2,7 +2,8 @@ image:
   repository: ghcr.io/rebodutch/safezone-cli-relay # DO NOT CHANGE unless you fully understand its implications
   tag: 0.2.1 # DO NOT CHANGE unless you fully understand its implications
   pullSecret: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io
-  
+
+commonLabels: {} # Optional: Common labels to be added to all resources  
 
 auth:
   roleFile: "" # REQUIRED: Path to the role file within the container, e.g., /app/roles.example.yml

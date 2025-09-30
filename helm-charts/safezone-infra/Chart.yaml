@@ -12,3 +12,6 @@ dependencies:
 - name: time-server
   version: 0.2.1
   repository: "file://charts/time-server"
+- name: redis-cache
+  version: 20.13.4
+  repository: "file://charts/redis-cache"

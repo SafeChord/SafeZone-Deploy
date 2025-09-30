@@ -3,6 +3,8 @@ image:
   pullSecret: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io
   tag: 0.2.1
 
+commonLabels: {} # Optional: Common labels to be added to all resources
+
 service:
   logLevel: INFO
 

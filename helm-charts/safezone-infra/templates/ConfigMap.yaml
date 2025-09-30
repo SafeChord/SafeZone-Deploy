@@ -4,6 +4,7 @@ metadata:
   name: {{ include "fullname" . }}-config
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
+    {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
 data:
   # cliRelays
   CLI_RELAY_URL: "{{ include "safezone.cliRelay.url" . }}"
