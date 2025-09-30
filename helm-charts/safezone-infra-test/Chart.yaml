@@ -1,0 +1,6 @@
+apiVersion: v2
+name: safezone-infra
+description: Umbrella chart for SafeZone project at phase infrastructure testing
+type: application
+version: 0.2.1
+appVersion: 0.2.1
