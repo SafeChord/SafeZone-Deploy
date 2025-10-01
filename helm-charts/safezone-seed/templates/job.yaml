@@ -4,6 +4,9 @@ metadata:
   name: {{ .Release.Name }}
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   backoffLimit: 1
   template:
@@ -14,13 +17,10 @@ spec:
       containers:
         - name: {{ .Values.job.name}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
           command: 
             - bash
-            - "/scripts/{{ .Values.job.script }}"
-          volumeMounts:
-            - name: scripts-volume
-              mountPath: /scripts
-              readOnly: true
+            - "scripts/{{ .Values.job.script }}"
           env:
             - name: ENVIRONMENT
               value: {{ .Values.env.environment | quote }}
@@ -48,8 +48,3 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.auth.authSecret }}
                   key: refresh_token
-      volumes:
-        - name: scripts-volume
-          configMap:
-            name: safezone-job-scripts
-            defaultMode: 0755

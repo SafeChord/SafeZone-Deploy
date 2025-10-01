@@ -1,0 +1,5 @@
+job:
+  name: "safezone-seed-data"
+  script: "/staging/seed_data.sh"
+env:
+  relayTimeout: 5400 # set a longer timeout for seeding job

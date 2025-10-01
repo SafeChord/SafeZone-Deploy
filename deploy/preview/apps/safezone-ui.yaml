@@ -5,8 +5,6 @@ metadata:
   name: safezone-ui
   annotations:
     argocd.argoproj.io/sync-wave: "40"
-  finalizers:
-    - argocd.argoproj.io/resources-finalizer
 spec:
   project: safezone
   source:

@@ -1,0 +1,3 @@
+job:
+  name: "safezone-seed-init"
+  script: "/preview/init.sh"
