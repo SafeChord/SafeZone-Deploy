@@ -19,6 +19,10 @@ controller:
   # the number of controller nodes have to be an odd number (1, 3, 5, ...) for voting algorithm
   replicaCount: 1
 
+  # to avoid kafka autocreate topics with too big replication factor
+  extraConfig: |
+    offsets.topic.replication.factor=1
+
   # the resource preset should be medium or higher，else you may encounter OOMKilled issue
   resourcesPreset: "medium"
 
