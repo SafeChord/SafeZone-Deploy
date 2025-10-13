@@ -36,19 +36,19 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 http://{{ include "safezone.cliRelay.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.cliRelay.port" . }}
 {{- end }}
 
-{{/* Covid Simulator */}}
+{{/* Pandemic Simulator */}}
 
-{{- define "safezone.covidSimulator.port" -}}
+{{- define "safezone.pandemicSimulator.port" -}}
 8000
 {{- end }}
 
-{{- define "safezone.covidSimulator.basename" -}}
-{{ include "fullname" . }}-covid-simulator
+{{- define "safezone.pandemicSimulator.basename" -}}
+{{ include "fullname" . }}-pandemic-simulator
 {{- end }}
 
 
-{{- define "safezone.covidSimulator.url" -}}
-http://{{ include "safezone.covidSimulator.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.covidSimulator.port" . }}
+{{- define "safezone.pandemicSimulator.url" -}}
+http://{{ include "safezone.pandemicSimulator.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.pandemicSimulator.port" . }}
 {{- end }}
 
 
@@ -62,9 +62,15 @@ http://{{ include "safezone.covidSimulator.basename" . }}.{{include "safezone.sv
 {{ include "fullname" . }}-ingestor
 {{- end }}
 
-
 {{- define "safezone.ingestor.url" -}}
-http://{{ include "safezone.ingestor.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.ingestor.port" . }}/collect
+http://{{ include "safezone.ingestor.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.ingestor.port" . }}
+{{- end }}
+
+
+{{/* Worker */}}
+
+{{- define "safezone.worker.basename" -}}
+{{ include "fullname" . }}-worker
 {{- end }}
 
 {{/* Analytics API */}}
@@ -103,7 +109,7 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{- end }}
 
 {{- define "safezone.redisCache.basename" -}}
-{{ include "fullname" . }}-redis-cache
+{{ include "fullname" . }}-redis-cache-master 
 {{- end }}
 
 {{- define "safezone.redisCache.host" -}}
