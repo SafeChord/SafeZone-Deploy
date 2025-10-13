@@ -9,7 +9,7 @@ data:
   # cliRelays
   CLI_RELAY_URL: "{{ include "safezone.cliRelay.url" . }}"
   # simulator
-  SIMULATOR_URL: "{{ include "safezone.covidSimulator.url" . }}"
+  SIMULATOR_URL: "{{ include "safezone.pandemicSimulator.url" . }}"
   # ingestor
   INGESTOR_URL: "{{ include "safezone.ingestor.url" . }}"
   # analyticsAPI
