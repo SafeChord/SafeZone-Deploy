@@ -4,8 +4,7 @@ metadata:
   name: {{ include "safezone.cliRelay.basename" . }}
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
-    {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
-    app: cli-relay
+  app: cli-relay
 spec:
   selector:
     matchLabels:
@@ -17,7 +16,7 @@ spec:
         app: cli-relay
     spec:
       imagePullSecrets:
-        - name: {{ .Values.image.pullSecret }}
+        - name: {{ .Values.global.ghcr.imagePullSecrets }}
       containers:
         - name: cli-relay
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
@@ -25,36 +24,57 @@ spec:
             - containerPort: 8000
           env:
             - name: ENVIRONMENT
-              value: {{ .Values.service.environment | quote }}
+              value: {{ default "staging" .Values.global.environment | quote }}
             # db_secret connection settings
             - name: DB_URL
+              {{- if .Values.database.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.dbSecret }}
+                  name: {{ .Values.database.existingSecret }}
                   key: db_url
-            - name: REPLICA_URL
+              {{- else if .Values.global.database.existingSecret }}
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.auth.dbSecret }}
+                  name: {{ .Values.global.database.existingSecret }}
+                  key: db_url
+              {{- else }}
+              value: "postgresql://user:password@localhost:5432/safezone"
+              {{- end }}
+            - name: REPLICA_URL
+              {{- if .Values.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
                   key: replica_url
+              {{- else if .Values.global.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.database.existingSecret }}
+                  key: replica_url
+              {{- else }}
+              value: "postgresql://user:password@localhost:5432/safezone"
+              {{- end }}
             # redis_secret connection settings
             - name: REDIS_HOST
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.auth.redisSecret }}
-                  key: redis_host
+              value: {{ coalesce .Values.redis.host .Values.global.redis.host "localhost" | quote }}
             - name: REDIS_PORT
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.auth.redisSecret }}
-                  key: redis_port
-            - name: REDIS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.auth.redisSecret }}
-                  key: redis_password
+              value: {{ coalesce .Values.redis.port .Values.global.redis.port 6379 | quote }}
             - name: REDIS_DB
-              value: "0"            
+              value: {{ coalesce .Values.redis.db .Values.global.redis.statusDB 0 | quote }}
+            - name: REDIS_PASSWORD
+              {{- if .Values.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.existingSecret }}
+                  key: redis-password
+              {{- else if .Values.global.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.redis.existingSecret }}
+                  key: redis-password
+              {{- else }}
+              value: ""
+              {{- end }}
             # cache_secret connection setting
             - name: CACHE_HOST
               valueFrom:
@@ -66,12 +86,25 @@ spec:
                 configMapKeyRef:
                   name: {{ include "fullname" . }}-config
                   key: REDIS_CACHE_PORT
+            - name: CACHE_DB
+              value: "0"
             - name: CACHE_PASSWORD
+              {{- if .Values.cache.password }}
+              value: {{ .Values.cache.password | quote }}
+              {{- else if .Values.cache.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cache.existingSecret }}
+                  key: redis-password
+              {{- else if .Values.global.cache.existingSecret }}
               valueFrom:  
                 secretKeyRef:
-                  name: {{ .Values.auth.cacheSecret }}
+                  name: {{ .Values.global.cache.existingSecret }}
                   key: redis-password
-            # auth_secret settings
+              {{- else }}
+              value: ""
+              {{- end }}
+            # auth_secret settings  
             - name: CLIENT_ID
               valueFrom:
                 secretKeyRef:
@@ -117,7 +150,7 @@ spec:
             - name: SERVICE_PORT
               value: "8000"
             - name: LOG_LEVEL
-              value: {{ .Values.service.logLevel | quote }}
+              value: {{ .Values.logLevel | quote }}
           # mounts for role file
           volumeMounts:
             - name: rolefile

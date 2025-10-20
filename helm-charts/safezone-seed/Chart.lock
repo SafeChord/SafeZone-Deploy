@@ -1,0 +1,6 @@
+dependencies:
+- name: safezone-common
+  repository: file://../safezone-common
+  version: 0.1.0
+digest: sha256:6dd33dfaeea9b25f9c8e500e61ee428592e98d117992daa23355eb4a94caa0af
+generated: "2025-10-16T06:45:40.977347656Z"
