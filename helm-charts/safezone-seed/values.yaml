@@ -1,3 +1,7 @@
+global:
+  safezone:
+    fullnameOverride: ""
+
 image:
   repository: ghcr.io/rebodutch/safezone-cli-command
   # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io

@@ -6,12 +6,15 @@ version: 0.2.1
 appVersion: 0.2.1
 
 dependencies:
-- name: cli-relay
+- name: safezone-common
+  version: 0.1.0
+  repository: "file://../safezone-common"
+- name: cliRelay
   version: 0.2.1
-  repository: "file://charts/cli-relay"
-- name: time-server
+  repository: "file://charts/cliRelay"
+- name: timeServer
   version: 0.2.1
-  repository: "file://charts/time-server"
-- name: redis-cache
+  repository: "file://charts/timeServer"
+- name: cache
   version: 20.13.4
-  repository: "file://charts/redis-cache"
+  repository: "file://charts/cache"

@@ -21,5 +21,6 @@ data:
   # redis-cache
   REDIS_CACHE_HOST: "{{ include "safezone.redisCache.host" . }}"
   REDIS_CACHE_PORT: "{{ include "safezone.redisCache.port" . }}"
+  REDIS_CACHE_DB: "{{ include "safezone.redisCache.db" . }}"
   # mkdoc
   MKDOC_URL: "{{ include "safezone.mkdoc.url" . }}"

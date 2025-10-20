@@ -14,7 +14,6 @@ spec:
     helm:
       valueFiles:
         - values-preview-seeddata.yaml
-        - values-preview.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: safezone-preview

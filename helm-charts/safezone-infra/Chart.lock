@@ -1,0 +1,15 @@
+dependencies:
+- name: safezone-common
+  repository: file://../safezone-common
+  version: 0.1.0
+- name: cliRelay
+  repository: file://charts/cliRelay
+  version: 0.2.1
+- name: timeServer
+  repository: file://charts/timeServer
+  version: 0.2.1
+- name: cache
+  repository: file://charts/cache
+  version: 20.13.4
+digest: sha256:ccf424b1f887cbae0ef464485083db6e1c0f4d7649b3d670ea9cd80b35b0be55
+generated: "2025-10-16T04:56:42.760753319Z"

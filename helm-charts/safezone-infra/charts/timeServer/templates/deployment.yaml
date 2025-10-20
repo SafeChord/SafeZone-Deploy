@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.timeServer.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: time-server
+spec:
+  selector:
+    matchLabels:
+      app: time-server
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: time-server
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecrets }}
+      containers:
+        - name: time-server
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ENVIRONMENT
+              value: {{ default "staging" .Values.global.environment }}
+            - name: REDIS_HOST
+              value: {{ coalesce .Values.redis.host .Values.global.redis.host "localhost" | quote }}
+            - name: REDIS_PORT
+              value: {{ coalesce .Values.redis.port .Values.global.redis.port 6379 | quote }}
+            - name: REDIS_DB
+              value: {{ coalesce .Values.redis.db .Values.global.redis.timeDB 1 | quote }}
+            - name: REDIS_PASSWORD
+              {{- if .Values.redis.password }}
+              value: {{ .Values.redis.password | quote }}
+              {{- else if .Values.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.existingSecret }}
+                  key: redis-password
+              {{- else if .Values.global.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.redis.existingSecret }}
+                  key: redis-password
+              {{- else }}
+              value: ""
+              {{- end }}
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}
