@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.analyticsAPI.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: analytics-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: analytics-api
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: analytics-api
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecret }}
+      containers:
+        - name: analytics-api
+          image: {{ .Values.analyticsAPI.image }}:{{ .Values.analyticsAPI.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment | quote }}
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.database.existingSecret }}
+                  key: replica_url    
+            - name: REDIS_HOST
+              value: {{ .Values.global.redis.host | quote }}
+            - name: REDIS_PORT
+              value: {{ .Values.global.redis.port | quote }}
+            - name: REDIS_DB
+              value: {{ .Values.global.redis.statusDB | quote }}
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.redis.existingSecret }}
+                  key: redis-password
+            - name: POLL_CACHE_VERSION_INTERVAL
+              value: {{ .Values.analyticsAPI.cache.checkVersionInterval | quote }}
+            - name: CACHE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: REDIS_CACHE_HOST
+            - name: CACHE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: REDIS_CACHE_PORT
+            - name: CACHE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.cache.existingSecret }}
+                  key: redis-password
+            - name: CACHE_DB
+              value: "0"
+            - name: SERVICE_VERSION
+              value: {{ .Values.analyticsAPI.tag | quote }}   
+            - name: SERVICE_PORT
+              value: "8000"
+            - name: LOG_LEVEL
+              value: {{ .Values.analyticsAPI.logLevel | quote }}
+      affinity:
+        {{- toYaml .Values.analyticsAPI.affinity | nindent 8 }}

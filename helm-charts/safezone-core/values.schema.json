@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "ghcr": {
+          "type": "object",
+          "properties": {
+            "imagePullSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["imagePullSecret"]
+        },
+        "database": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["existingSecret"]
+        },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "host": {
+              "type": "string",
+              "minLength": 1
+            },
+            "port": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "statusDB": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["host", "port", "statusDB", "existingSecret"]
+        },
+        "cache": {
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["existingSecret"]
+        }
+      },
+      "required": ["ghcr", "database", "redis", "cache"]
+    }
+  },
+  "required": ["global"]
+}

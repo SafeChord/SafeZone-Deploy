@@ -2,16 +2,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "safezone.covidSimulator.basename" . }}
+  name: {{ include "safezone.pandemicSimulator.basename" . }}
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
 spec:
   selector:
-    app: covid-simulator
+    app: pandemic-simulator
   type: ClusterIP
   ports:
     - protocol: TCP
-      port: {{ .Values.simulator.service.port }}
+      port: 8000
       targetPort: 8000
 ---
 apiVersion: v1
@@ -26,5 +26,5 @@ spec:
   type: ClusterIP
   ports:
     - protocol: TCP
-      port: {{ .Values.ingestor.service.port }}
+      port: 8000
       targetPort: 8000

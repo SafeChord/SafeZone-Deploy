@@ -1,0 +1,112 @@
+# global tag is shared in umbrella chart between subcharts
+global:
+  # REQUIRED: Environment name (e.g., dev, staging, production) 
+  environment: "" 
+  
+  ghcr:
+    # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io
+    imagePullSecret: ""  
+  
+  database:
+    # REQUIRED: Name of the Kubernetes Secret containing database credentials
+    # The secret must include the key `db_url` and `replica_url` (example: postgres://user:password@host:port/dbname)
+    # Database reference: https://www.postgresql.org/docs/current/auth-methods.html
+    existingSecret: ""
+  
+  kafka:
+    # REQUIRED: Comma-separated list of Kafka brokers (e.g., broker1:9092,broker2:9092)
+    brokers: "" 
+
+    # REQUIRED: Kafka topic for the worker to consume messages from
+    topic: "covid-case-data"
+    
+    # REQUIRED: Kafka consumer group ID for the worker
+    consumerGroup: "safezone-worker-group"
+
+# a pandemic data simulator that reads historical data and sends data to the ingestor as current data
+simulator:
+  # simulator container configuration
+  image: ghcr.io/rebodutch/safezone-pandemic-simulator
+  tag: 0.2.1
+
+  # logging configuration
+  logLevel: INFO
+
+  # affinity configuration
+  affinity: {}
+
+  async:
+    # maximum number of concurrent requests from simulator to ingestor at a time
+    concurrentRequests: 10
+
+  volume:
+    # data source configuration
+    data:
+      # name of the data file in the volume
+      fileName: "covid_data.csv"
+
+      # path to the data file to simulate
+      filePath: "/data"
+
+    # bind the simulator data to a persistent volume claim (PVC)
+    # use bindingVolumeName to switch between different persistent volumes for different scenarios
+    persistentVolumeClaim:
+      # Name of an existing PVC to use for data storage 
+      claimName: "simulator-data-pvc"
+
+      # type of data to simulate, only two types are supported: smoke-test and full-data
+      # it is a selector to bind to different PVs with different data sets
+      type: "smoke-test"
+      
+
+# a data ingestor that receives data from the simulator and produces events to Kafka
+ingestor:
+  # ingestor container configuration
+  image: ghcr.io/rebodutch/safezone-data-ingestor
+  tag: 0.2.1
+  
+  # logging configuration
+  logLevel: INFO
+
+  # affinity configuration
+  affinity: {}
+
+# a kafka consumer worker that processes events from the ingestor
+worker:
+  # worker container configuration
+  image: ghcr.io/rebodutch/safezone-worker
+  tag: 0.2.1
+  
+  # logging configuration
+  logLevel: INFO
+
+  # affinity configuration
+  affinity: {}
+
+  # batch processing configuration
+  batch:
+    # Maximum number of messages to process in one batch
+    size: 100
+
+    # Interval (seconds) to flush the batch if size not reached
+    flushInterval: 5
+
+  # worker KEDA configuration with Kafka scaler
+  scaling:
+    # enable or disable KEDA autoscaling for the worker
+    enabled: true
+    
+    # minimum number of worker pods
+    minReplicas: 1 
+    
+    # ABSOLUTE MAXIMUM number of worker pods 
+    maxReplicas: 5
+
+    # Number of unprocessed messages in Kafka that will trigger scaling
+    lagThreshold: 10
+
+    # How often KEDA checks Kafka for lag (seconds)
+    pollingInterval: 15
+    
+    # How long to wait after the last event before scaling down to minReplicas/0 (seconds)
+    cooldownPeriod: 60
