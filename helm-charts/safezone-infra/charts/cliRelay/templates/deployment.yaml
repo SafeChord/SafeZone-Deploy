@@ -60,7 +60,13 @@ spec:
             - name: REDIS_PORT
               value: {{ coalesce .Values.redis.port .Values.global.redis.port 6379 | quote }}
             - name: REDIS_DB
-              value: {{ coalesce .Values.redis.db .Values.global.redis.statusDB 0 | quote }}
+              {{- if .Values.redis.db }}
+              value: {{ .Values.redis.db | quote }}
+              {{- else if .Values.global.redis.statusDB }}
+              value: {{ .Values.global.redis.statusDB | quote }}
+              {{- else }}
+              value: "0"
+              {{- end }}
             - name: REDIS_PASSWORD
               {{- if .Values.redis.existingSecret }}
               valueFrom:
