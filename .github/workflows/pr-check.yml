@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           CHART_PATH="helm-charts/safezone-${{ steps.extract_chart.outputs.chart_name }}"
           echo "Linting chart at: $CHART_PATH"
-          helm lint $CHART_PATH -f "${CHART_PATH}/values-preview.yaml" -f "${CHART_PATH}/values-preview-init.yaml"
+          helm lint $CHART_PATH -f "${CHART_PATH}/values-preview.yaml"
 
       - name: Helm Dry-Run Validation
         run: |
@@ -38,7 +38,6 @@ jobs:
           echo "Performing Helm template for chart: $CHART_PATH"
           helm template $CHART_NAME $CHART_PATH \
             -f "${CHART_PATH}/values-preview.yaml" \
-            -f "${CHART_PATH}/values-preview-init.yaml" \
             --namespace safezone-preview
 
       - name: Send Slack Notification
