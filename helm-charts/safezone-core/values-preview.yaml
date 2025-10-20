@@ -1,0 +1,63 @@
+# umbrella values for the safezone project
+global:
+  environment: "staging" # REQUIRED: Environment name (e.g., dev, staging, production)
+  ghcr:
+    imagePullSecret: ghcrPull-secret
+  database :
+    existingSecret: k3han-db-secrets
+  redis:
+    host: bitnami-redis-preview-master.safezone-preview.svc.cluster.local
+    existingSecret: k3han-redis-secrets
+  cache:
+    existingSecret: safezone-cache-secrets
+  kafka:
+    brokers: bitnami-kafka-preview.safezone-preview.svc.cluster.local:9092
+
+# readPipeline subchart contains the analytics API and dashboard
+readPipeline:
+  analyticsAPI:
+    affinity: 
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
+
+# writePipeline subchart contains the simulator、ingestor and worker
+writePipeline:
+  simulator:
+    volume:
+      persistentVolumeClaim:
+        type: "smoke-test"
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
+  ingestor:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                 - always
+  worker:
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values: 
+                - always

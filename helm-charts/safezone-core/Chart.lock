@@ -1,0 +1,12 @@
+dependencies:
+- name: safezone-common
+  repository: file://../safezone-common
+  version: 0.1.0
+- name: writePipeline
+  repository: file://charts/writePipeline
+  version: 0.2.1
+- name: readPipeline
+  repository: file://charts/readPipeline
+  version: 0.2.1
+digest: sha256:b560c5abfed5f56fd5498d9ff81728d028e2f92bc537c71f928ed2f2c653e934
+generated: "2025-10-16T07:09:23.88019973Z"

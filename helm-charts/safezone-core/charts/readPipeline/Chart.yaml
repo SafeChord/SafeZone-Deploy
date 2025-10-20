@@ -1,0 +1,6 @@
+apiVersion: v2
+name: readPipeline
+description: SafeZone Read Pipeline Services (analytics api)
+type: application
+version: 0.2.1
+appVersion: "0.2.1"
