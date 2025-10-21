@@ -1,10 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}
+  generateName: {{ .Release.Name }}-
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
   annotations:
+    argocd.argoproj.io/hook: Sync
     argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   backoffLimit: 1
