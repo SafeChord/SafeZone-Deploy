@@ -10,4 +10,4 @@ env:
 
 job:
   name: "safezone-seed-data"
-  script: "/preview/seed_data.sh"
+  script: "preview/seed_data.sh"

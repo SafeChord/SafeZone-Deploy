@@ -9,4 +9,4 @@ env:
   
 job:
   name: "safezone-seed-init"
-  script: "/staging/init.sh"
+  script: "staging/init.sh"
