@@ -156,8 +156,8 @@ writePipeline:
       # Maximum number of messages to process in one batch
       size: 100
 
-      # Interval (seconds) to flush the batch if size not reached
-      flushInterval: 5
+      # Interval (using golang duration syntax) to flush the batch if size not reached
+      flushInterval: 5s
 
     # worker KEDA configuration with Kafka scaler
     scaling:

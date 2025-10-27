@@ -1,8 +1,8 @@
 {{/* helpers for SafeZone infra umbrella chart */}}
 
 {{- define "fullname" -}}
-{{- if .Values.fullnameOverride -}}
-{{ .Values.fullnameOverride }}
+{{- if .Values.global.fullnameOverride -}}
+{{ .Values.global.fullnameOverride }}
 {{- else -}}
 safezone
 {{- end -}}
@@ -24,7 +24,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/* CLI Relay */}}
 
 {{- define "safezone.cliRelay.port" -}}
-8000
+{{ default 8000 .Values.cliRelay.service.port }}
 {{- end }}
 
 {{- define "safezone.cliRelay.basename" -}}
@@ -36,41 +36,47 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 http://{{ include "safezone.cliRelay.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.cliRelay.port" . }}
 {{- end }}
 
-{{/* Covid Simulator */}}
+{{/* Pandemic Simulator */}}
 
-{{- define "safezone.covidSimulator.port" -}}
-8000
+{{- define "safezone.pandemicSimulator.port" -}}
+{{ default .Values.simulator.service.port }}
 {{- end }}
 
-{{- define "safezone.covidSimulator.basename" -}}
-{{ include "fullname" . }}-covid-simulator
+{{- define "safezone.pandemicSimulator.basename" -}}
+{{ include "fullname" . }}-pandemic-simulator
 {{- end }}
 
 
-{{- define "safezone.covidSimulator.url" -}}
-http://{{ include "safezone.covidSimulator.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.covidSimulator.port" . }}
+{{- define "safezone.pandemicSimulator.url" -}}
+http://{{ include "safezone.pandemicSimulator.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.pandemicSimulator.port" . }}
 {{- end }}
 
 
 {{/* Ingestor */}}
 
 {{- define "safezone.ingestor.port" -}}
-8000
+{{ default 8000 .Values.ingestor.service.port }}
 {{- end }}
 
 {{- define "safezone.ingestor.basename" -}}
 {{ include "fullname" . }}-ingestor
 {{- end }}
 
-
 {{- define "safezone.ingestor.url" -}}
-http://{{ include "safezone.ingestor.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.ingestor.port" . }}/collect
+http://{{ include "safezone.ingestor.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.ingestor.port" . }}
+{{- end }}
+
+
+{{/* Worker */}}
+
+{{- define "safezone.worker.basename" -}}
+{{ include "fullname" . }}-worker
 {{- end }}
 
 {{/* Analytics API */}}
 
 {{- define "safezone.analyticsAPI.port" -}}
-8000
+{{ default 8000 .Values.analyticsAPI.service.port }}
 {{- end }}
 
 {{- define "safezone.analyticsAPI.basename" -}}
@@ -85,7 +91,7 @@ http://{{ include "safezone.analyticsAPI.basename" . }}.{{include "safezone.svc.
 {{/* Dashboard */}}
 
 {{- define "safezone.dashboard.port" -}}
-8080
+{{ default .Values.service.port }}
 {{- end }}
 
 {{- define "safezone.dashboard.basename" -}}
@@ -99,11 +105,15 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{/* Cache Redis */}}
 
 {{- define "safezone.redisCache.port" -}}
-6379
+{{ default 6379 .Values.cache.port }}
+{{- end }}
+
+{{- define "safezone.redisCache.db" -}}
+{{ default 0 .Values.cache.db }}
 {{- end }}
 
 {{- define "safezone.redisCache.basename" -}}
-{{ include "fullname" . }}-redis-cache
+{{ include "fullname" . }}-redis-cache-master 
 {{- end }}
 
 {{- define "safezone.redisCache.host" -}}
@@ -113,7 +123,7 @@ http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.pos
 {{/* Time Server */}}
 
 {{- define "safezone.timeServer.port" -}}
-8000
+{{ default 8000 .Values.timeServer.service.port }}
 {{- end }}
 
 {{- define "safezone.timeServer.basename" -}}
@@ -128,7 +138,7 @@ http://{{ include "safezone.timeServer.basename" . }}.{{include "safezone.svc.po
 {{/* Mkdoc */}}
 
 {{- define "safezone.mkdoc.port" -}}
-8080
+{{ default 8080 .Values.service.port }}
 {{- end }}
 
 {{- define "safezone.mkdoc.basename" -}}
