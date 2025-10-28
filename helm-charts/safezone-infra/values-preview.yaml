@@ -54,7 +54,7 @@ cache:
 
 ingress:
   className: nginx-public
-  host: preview.safezone.omh.idv.tw
+  host: preview-safezone.omh.idv.tw
   dashboard:
     path: /dashboard
   cliRelay:
