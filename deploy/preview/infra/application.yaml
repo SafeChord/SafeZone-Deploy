@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: safezone-preview-infra-stage
+  namespace: gitops
+spec:
+  generators:
+    - list:
+        elements:
+          - stage: data
+            path: deploy/preview/infra/datas
+            wave: "1"
+          - stage: secrets
+            path: deploy/preview/infra/secrets
+            wave: "1"
+          - stage: manifests
+            path: deploy/preview/infra/manifests
+            wave: "2"
+  template:
+    metadata:
+      name: 'preview-infra-{{stage}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      labels:
+        safezone.io/stage: preview-infra
+        safezone.io/component: '{{stage}}'
+    spec:
+      project: safezone
+      source:
+        repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
+        targetRevision: deploy/0.2.1
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: safezone-preview
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: safezone-staging-infra-stage
+  namespace: gitops
+spec:
+  generators:
+    - list:
+        elements:
+          - stage: data
+            path: deploy/staging/infra/datas
+            wave: "1"
+          - stage: secrets
+            path: deploy/staging/infra/secrets
+            wave: "1"
+          - stage: manifests
+            path: deploy/staging/infra/manifests
+            wave: "2"
+  template:
+    metadata:
+      name: 'staging-infra-{{stage}}'
+      annotations:
+        argocd.argoproj.io/sync-wave: '{{wave}}'
+      labels:
+        safezone.io/stage: staging-infra
+        safezone.io/component: '{{stage}}'
+    spec:
+      project: safezone
+      source:
+        repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
+        targetRevision: staging
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: safezone
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

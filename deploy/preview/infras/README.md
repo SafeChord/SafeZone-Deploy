@@ -1,1 +1,0 @@
-# SafeZone preview infrastructure

@@ -1,0 +1,13 @@
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: covid-case-data
+  namespace: safezone
+  labels:
+    strimzi.io/cluster: k3han-cluster
+spec:
+  partitions: 3
+  replicas: 1
+  config:
+    retention.ms: 604800000 # 7 days for staging
+    segment.bytes: 1073741824

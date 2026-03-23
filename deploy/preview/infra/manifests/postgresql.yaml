@@ -1,0 +1,23 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: db-primary
+  namespace: safezone-preview
+spec:
+  instances: 1 
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.7
+
+  # Storage strategy for Preview: Simple local-path with persistent claim but no specific node affinity
+  storage:
+    size: 5Gi
+    storageClass: local-path
+
+  # Integrate with existing Secret name for password management
+  superuserSecret:
+      name: k3han-db-secrets
+  
+  postgresql:
+    parameters:
+      max_slot_wal_keep_size: "1GB"
+    pg_hba:
+      - host all postgres all scram-sha-256
