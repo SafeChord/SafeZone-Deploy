@@ -7,14 +7,14 @@ spec:
   generators:
     - list:
         elements:
-          - stage: data
-            path: deploy/staging/infra/datas
+          - stage: foundation
+            path: deploy/staging/infra/foundation
+            wave: "-2"
+          - stage: security
+            path: deploy/staging/infra/security
             wave: "1"
-          - stage: secrets
-            path: deploy/staging/infra/secrets
-            wave: "1"
-          - stage: manifests
-            path: deploy/staging/infra/manifests
+          - stage: workloads
+            path: deploy/staging/infra/workloads
             wave: "2"
   template:
     metadata:

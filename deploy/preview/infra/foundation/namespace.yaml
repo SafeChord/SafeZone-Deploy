@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: safezone-preview
+  labels:
+    safezone.io/environment: preview
+    safezone.io/managed-by: gitops
