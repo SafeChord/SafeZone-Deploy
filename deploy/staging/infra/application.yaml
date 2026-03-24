@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
   name: safezone-staging-infra-stage
-  namespace: gitops
+  namespace: argocd
 spec:
   generators:
     - list:

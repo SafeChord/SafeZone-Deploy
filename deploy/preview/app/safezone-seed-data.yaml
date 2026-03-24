@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  namespace: gitops
+  namespace: argocd
   name: safezone-seed-data
 spec:
   project: safezone
