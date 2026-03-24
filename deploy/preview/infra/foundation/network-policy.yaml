@@ -12,9 +12,12 @@ spec:
   - Egress
   ingress:
   - from:
-    - podSelector: {} # 允許來自同 namespace 的流量
-    - namespaceSelector:
+    - podSelector: {} # Allow intra-namespace traffic
+    - namespaceSelector: # CNPG operator health checks (port 8000)
         matchLabels:
           kubernetes.io/metadata.name: database
+    - namespaceSelector: # Ingress controller → app services
+        matchLabels:
+          kubernetes.io/metadata.name: ingress
   egress:
-  - {} # 暫時允許所有 Egress 以確保能連到外部 Kafka/DB (因為 Flannel 不執行限制，這裡主要作為文檔)
+  - {} # Allow all egress: Kafka (kafka ns), DNS (kube-system), external APIs
