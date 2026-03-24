@@ -13,5 +13,8 @@ spec:
   ingress:
   - from:
     - podSelector: {} # 允許來自同 namespace 的流量
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: database
   egress:
   - {} # 暫時允許所有 Egress 以確保能連到外部 Kafka/DB (因為 Flannel 不執行限制，這裡主要作為文檔)
