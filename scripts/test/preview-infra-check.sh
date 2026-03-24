@@ -31,7 +31,7 @@ PG_PASS=$(kubectl get secret k3han-db-secrets -n "$NAMESPACE" -o jsonpath="{.dat
 
 log "Executing SQL check on $PG_POD..."
 kubectl exec -n "$NAMESPACE" "$PG_POD" -c postgres -- \
-    psql -U postgres -d safezone -c "SELECT 'PostgreSQL Connection OK' as status;" | grep "OK"
+    psql -U postgres -d postgres -c "SELECT 'PostgreSQL Connection OK' as status;" | grep "OK"
 log "✅ SUCCESS: PostgreSQL is reachable and authenticated."
 
 
@@ -66,7 +66,7 @@ fi
 # 4. Kafka Topic Test (Logical Isolation)
 log "\n4. Testing Kafka Topic Definition..."
 TOPIC_NAME="preview-covid-case-data"
-TOPIC_STATUS=$(kubectl get kafkatopic "$TOPIC_NAME" -n "$NAMESPACE" -o jsonpath="{.status.conditions[0].type}" 2>/dev/null || echo "NOT_FOUND")
+TOPIC_STATUS=$(kubectl get kafkatopic "$TOPIC_NAME" -n kafka -o jsonpath="{.status.conditions[0].type}" 2>/dev/null || echo "NOT_FOUND")
 
 if [ "$TOPIC_STATUS" == "Ready" ]; then
     log "✅ SUCCESS: KafkaTopic '$TOPIC_NAME' is Ready."
