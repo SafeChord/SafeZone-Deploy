@@ -3,6 +3,8 @@ kind: NetworkPolicy
 metadata:
   name: preview-default-policy
   namespace: safezone-preview
+  annotations:
+    argocd.argoproj.io/sync-wave: '1'
 spec:
   podSelector: {} # 選取所有 Pod
   policyTypes:
