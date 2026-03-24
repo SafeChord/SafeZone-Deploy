@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.dashboard.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: dashboard
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecrets }}
+      containers:
+        - name: dashboard
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment | quote }}
+            - name: ANALYTICS_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: ANALYTICS_API_URL
+            - name: TIME_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: TIME_SERVER_URL
+            - name: SERVICE_NAME
+              value: safezone-dashboard
+            - name: SERVICE_VERSION
+              value: {{ .Values.image.tag | quote }}
+            - name: SERVER_IP
+              value: "0.0.0.0"
+            - name: SERVICE_PORT
+              value: "8080"
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}

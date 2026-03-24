@@ -30,15 +30,9 @@ global:
       name: mkdoc
       port: 8080
 
-# ---------------------------------
-# dashboard is a service that provides a web-based interface for the SafeZone project.
-# It is designed to work with the SafeZone project and provides a way to interact with the system through a graphical interface.
-# dashboard references: https://github.com/rebodutch/SafeZone/blob/staging/tools/dashboard/README.md
-# ---------------------------------
-dashboard:
-  image:
-    repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.2.1
+image:
+  repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications
+  tag: 0.2.1
 
-  logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
-  affinity: {}  # Optional: Node affinity rules for Dashboard pods
+logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
+affinity:   # Optional: Node affinity rules for Dashboard pods
