@@ -2,7 +2,7 @@ apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
 metadata:
   name: preview-covid-case-data
-  namespace: safezone-preview
+  namespace: kafka
   labels:
     strimzi.io/cluster: k3han-cluster
 spec:
