@@ -8,8 +8,5 @@ dependencies:
 - name: timeServer
   repository: file://charts/timeServer
   version: 0.2.1
-- name: cache
-  repository: file://charts/cache
-  version: 20.13.4
-digest: sha256:ccf424b1f887cbae0ef464485083db6e1c0f4d7649b3d670ea9cd80b35b0be55
-generated: "2025-10-16T04:56:42.760753319Z"
+digest: sha256:b410287c6771cb3ff78e4af12c63dd6074b18148a00fdf92643d14a4302878c5
+generated: "2026-03-24T03:24:55.610793026Z"

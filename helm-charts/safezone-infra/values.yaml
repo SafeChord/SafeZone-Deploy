@@ -33,14 +33,10 @@ global:
     existingSecret: "" 
   
   cache:
-    # the following two options should be same as cache.auth  
-    # @param auth.password Redis&reg; password
-    # Defaults to a random 10-character alphanumeric string if not set
-    password: ""
-
-    # REQUIRED: Name of the Kubernetes Secret containing cache (Redis) credentials
+    host: "" # REQUIRED: Cache Redis host (e.g., valkey-cache)
+    port: 6379 # Optional: Cache Redis port
+    # REQUIRED: Name of the Kubernetes Secret containing cache credentials
     # The secret must include the key `redis-password`
-    # Cache (Redis) reference: https://redis.io/docs/management/security/security-redis-password/
     existingSecret: "" 
   
   # Service discovery settings for inter-service communication
@@ -100,14 +96,6 @@ cliRelay:
     db: "" # Optional: Override global.redis.statusDB for CLI Relay
     existingSecret: "" # Optional: Override global.redis.existingSecret for CLI Relay
 
-  cache:
-    host: "" # Optional: Override global.cache.host for CLI Relay
-    port: "" # Optional: Override global.cache.port for CLI Relay
-    db: "" # Optional: Override global.cache.db for CLI Relay
-    # the following two options should be same as cache.auth
-    password: "" # Optional: Directly set Redis password for CLI Relay (overrides existingSecret)
-    existingSecret: "" # Optional: Override global.cache.existingSecret for CLI Relay
-
   logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
   affinity: {}  # Optional: Node affinity rules for CLI Relay pods
 
@@ -132,39 +120,6 @@ timeServer:
 
   logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
   affinity: {}  # Optional: Node affinity rules for time server pods
-
-# -------------------------------
-# Redis instance for caching service-layer data (used by APIs, dashboard, etc.)
-# Stores high-frequency data such as query results and session cache
-# -------------------------------
-# the values here are customized for SafeZone project
-# full values can be found in the /charts/redis-cache/values.yaml
-cache:
-   # Override the full name of the Redis cache instance
-  fullnameOverride: "safezone-redis-cache" 
-
-  # Customized for this project: standalone Redis without replica
-  architecture: standalone
-  replica:
-    enabled: false
-
-  # it should be the same as global.cache.existingSecret
-  auth:
-    ## @param auth.password Redis&reg; password
-    ## Defaults to a random 10-character alphanumeric string if not set
-    password: ""
-
-    # REQUIRED: Name of the existing Kubernetes Secret containing the Redis password
-    # The secret must include the key `redis-password`
-    # Reference: https://redis.io/docs/management/security/security-redis-password/
-    existingSecret: ""
-
-    # If password and existingSecret are not set, the Bitnami Redis chart will generate a random password automatically
-  master:
-    # @param master.persistence.enabled Enable Redis&reg; master persistence using PVC
-    persistence:
-      enabled: false # only for cache use cases， set to false to avoid unnecessary disk usage
-    affinity: {}  # Optional: Node affinity rules for Redis-cache master pods
 
 # ---------------------------------
 # SafeZone is exposed through an Ingress resource, which is a Kubernetes object that manages external access to services within the cluster.
