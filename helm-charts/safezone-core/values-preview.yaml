@@ -2,16 +2,16 @@
 global:
   environment: "staging" # REQUIRED: Environment name (e.g., dev, staging, production)
   ghcr:
-    imagePullSecret: ghcrPull-secret
-  database :
+    imagePullSecret: ghcr-pull-secret
+  database:
     existingSecret: k3han-db-secrets
   redis:
-    host: bitnami-redis-preview-master.safezone-preview.svc.cluster.local
+    host: valkey-state.safezone-preview.svc.cluster.local
     existingSecret: k3han-redis-secrets
   cache:
     existingSecret: safezone-cache-secrets
   kafka:
-    brokers: bitnami-kafka-preview.safezone-preview.svc.cluster.local:9092
+    brokers: k3han-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
 
 # readPipeline subchart contains the analytics API and dashboard
 readPipeline:

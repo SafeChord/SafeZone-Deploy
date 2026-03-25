@@ -15,7 +15,12 @@ spec:
   # Integrate with existing Secret name for password management
   superuserSecret:
       name: k3han-db-secrets
-  
+
+  bootstrap:
+    initdb:
+      database: safezone
+      owner: postgres
+
   postgresql:
     parameters:
       max_slot_wal_keep_size: "1GB"

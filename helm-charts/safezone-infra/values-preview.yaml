@@ -5,7 +5,7 @@ global:
   database:
     existingSecret: k3han-db-secrets
   redis:
-    host: bitnami-redis-preview-master.safezone-preview.svc.cluster.local
+    host: valkey-state.safezone-preview.svc.cluster.local
     existingSecret: k3han-redis-secrets
   cache:
     existingSecret: safezone-cache-secrets
