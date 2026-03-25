@@ -4,7 +4,7 @@ metadata:
   name: {{ include "fullname" . }}-ingress-rewrite
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
-    {{- include "common.labels.standard" ( dict "customLabels" .Values.commonLabels "context" $ ) | nindent 4 }}
+
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
     nginx.ingress.kubernetes.io/router.entrypoints: web
