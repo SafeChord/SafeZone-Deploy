@@ -10,6 +10,10 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-body-size: "20m"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:

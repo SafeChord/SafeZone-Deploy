@@ -55,6 +55,8 @@ cache:
 ingress:
   className: nginx-public
   host: preview-safezone.omh.idv.tw
+  tls:
+    secretName: cloudflare-origin-cert
   dashboard:
     path: /dashboard
   cliRelay:

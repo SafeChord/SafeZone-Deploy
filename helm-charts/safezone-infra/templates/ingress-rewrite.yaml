@@ -10,6 +10,10 @@ metadata:
     nginx.ingress.kubernetes.io/router.entrypoints: web
 spec:
   ingressClassName: {{ .Values.ingress.className }}
+  tls:
+    - hosts:
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.secretName }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:
