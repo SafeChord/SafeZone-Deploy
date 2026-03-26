@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init-safezone-role
+  namespace: safezone-preview
+spec:
+  backoffLimit: 3
+  ttlSecondsAfterFinished: 300
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-db
+          image: postgres:17-alpine
+          command:
+            - sh
+            - -c
+            - "until pg_isready -h db-primary-rw -U postgres; do echo waiting; sleep 2; done"
+      containers:
+        - name: init
+          image: postgres:17-alpine
+          env:
+            - name: PGHOST
+              value: db-primary-rw
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: k3han-db-secrets
+                  key: username
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: k3han-db-secrets
+                  key: password
+            - name: APP_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: safezone-role-password
+                  key: password
+          command:
+            - sh
+            - -c
+            - |
+              psql -v ON_ERROR_STOP=1 -d postgres -c "
+                DO \$\$
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'safezone') THEN
+                    EXECUTE format('CREATE ROLE safezone LOGIN PASSWORD %L', '$APP_PASSWORD');
+                  ELSE
+                    EXECUTE format('ALTER ROLE safezone PASSWORD %L', '$APP_PASSWORD');
+                  END IF;
+                END
+                \$\$;
+              "

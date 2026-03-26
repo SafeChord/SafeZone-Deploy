@@ -51,5 +51,6 @@ seal_file "kafkasecrets"
 seal_file "redissecrets"
 seal_file "rolesecrets"
 seal_file "certsecrets"
+seal_file "role-password"
 
 log "✅ SUCCESS: All secrets sealed in $TARGET_DIR"

@@ -16,6 +16,9 @@ spec:
           - stage: workloads
             path: deploy/preview/infra/workloads
             wave: "2"
+          - stage: init
+            path: deploy/preview/infra/init
+            wave: "3"
   template:
     metadata:
       name: 'preview-infra-{{stage}}'

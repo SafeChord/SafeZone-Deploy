@@ -4,7 +4,7 @@ global:
   ghcr:
     imagePullSecret: ghcr-pull-secret
   database:
-    existingSecret: k3han-db-secrets
+    existingSecret: safezone-role-password
   redis:
     host: valkey-state.safezone-preview.svc.cluster.local
     existingSecret: k3han-redis-secrets
