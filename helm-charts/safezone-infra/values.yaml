@@ -64,9 +64,6 @@ global:
     dashboard:
       name: dashboard
       port: 8080
-    mkdoc:
-      name: mkdoc
-      port: 8080
 
 # ---------------------------------
 # cli-relay is a service that acts as a relay for command-line interface (CLI) requests.

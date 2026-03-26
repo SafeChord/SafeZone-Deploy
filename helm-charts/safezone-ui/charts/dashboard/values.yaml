@@ -26,9 +26,6 @@ global:
     dashboard:
       name: dashboard
       port: 8080
-    mkdoc:
-      name: mkdoc
-      port: 8080
 
 image:
   repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications

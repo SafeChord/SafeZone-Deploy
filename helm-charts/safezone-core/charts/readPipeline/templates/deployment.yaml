@@ -46,15 +46,9 @@ spec:
             - name: POLL_CACHE_VERSION_INTERVAL
               value: {{ .Values.analyticsAPI.cache.checkVersionInterval | quote }}
             - name: CACHE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "fullname" . }}-config
-                  key: REDIS_CACHE_HOST
+              value: {{ coalesce .Values.global.cache.host "localhost" | quote }}
             - name: CACHE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "fullname" . }}-config
-                  key: REDIS_CACHE_PORT
+              value: {{ coalesce .Values.global.cache.port 6379 | quote }}
             - name: CACHE_PASSWORD
               valueFrom:
                 secretKeyRef:

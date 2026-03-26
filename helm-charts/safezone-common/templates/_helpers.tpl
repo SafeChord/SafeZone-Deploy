@@ -19,24 +19,6 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{/* Infra */}}
 
-{{/* Cache Redis */}}
-
-{{- define "safezone.redisCache.port" -}}
-6379
-{{- end }}
-
-{{- define "safezone.redisCache.db" -}}
-0
-{{- end }}
-
-{{- define "safezone.redisCache.basename" -}}
-{{ include "fullname" . }}-redis-cache-master 
-{{- end }}
-
-{{- define "safezone.redisCache.host" -}}
-{{ include "safezone.redisCache.basename" . }}.{{include "safezone.svc.postfix" . }}
-{{- end }}
-
 {{/* Time Server */}}
 
 {{- define "safezone.timeServer.port" -}}
@@ -136,19 +118,4 @@ http://{{ include "safezone.analyticsAPI.basename" . }}.{{include "safezone.svc.
 
 {{- define "safezone.dashboard.url" -}}
 http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.dashboard.port" . }}
-{{- end }}
-
-
-{{/* Mkdoc */}}
-
-{{- define "safezone.mkdoc.port" -}}
-{{ default 8080 .Values.global.serviceDiscovery.mkdoc.port }}
-{{- end }}
-
-{{- define "safezone.mkdoc.basename" -}}
-{{ include "fullname" . }}-{{ default "mkdoc" .Values.global.serviceDiscovery.mkdoc.name }}
-{{- end }}
-
-{{- define "safezone.mkdoc.url" -}}
-http://{{ include "safezone.mkdoc.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.mkdoc.port" . }}
 {{- end }}

@@ -9,6 +9,8 @@ global:
     host: valkey-state.safezone-preview.svc.cluster.local
     existingSecret: k3han-redis-secrets
   cache:
+    host: valkey-cache.safezone-preview.svc.cluster.local
+    port: 6379
     existingSecret: safezone-cache-secrets
   kafka:
     brokers: k3han-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092

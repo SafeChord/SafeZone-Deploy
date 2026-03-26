@@ -83,15 +83,9 @@ spec:
               {{- end }}
             # cache_secret connection setting
             - name: CACHE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "fullname" . }}-config
-                  key: REDIS_CACHE_HOST
+              value: {{ coalesce .Values.cache.host .Values.global.cache.host "localhost" | quote }}
             - name: CACHE_PORT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "fullname" . }}-config
-                  key: REDIS_CACHE_PORT
+              value: {{ coalesce .Values.cache.port .Values.global.cache.port 6379 | quote }}
             - name: CACHE_DB
               value: "0"
             - name: CACHE_PASSWORD
@@ -137,11 +131,6 @@ spec:
                 configMapKeyRef:
                   name: {{ include "fullname" . }}-config
                   key: DASHBOARD_URL
-            - name: MKDOC_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ include "fullname" . }}-config
-                  key: MKDOC_URL
             - name: TIME_SERVER_URL
               valueFrom:
                 configMapKeyRef:

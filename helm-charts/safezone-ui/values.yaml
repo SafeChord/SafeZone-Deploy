@@ -26,9 +26,6 @@ global:
     dashboard:
       name: dashboard
       port: 8080
-    mkdoc:
-      name: mkdoc
-      port: 8080
 
 # ---------------------------------
 # dashboard is a service that provides a web-based interface for the SafeZone project.
