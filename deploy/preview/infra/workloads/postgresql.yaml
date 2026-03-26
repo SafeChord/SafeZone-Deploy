@@ -12,7 +12,8 @@ spec:
     size: 5Gi
     storageClass: local-path
 
-  # Integrate with existing Secret name for password management
+  enableSuperuserAccess: true
+
   superuserSecret:
       name: k3han-db-secrets
 
