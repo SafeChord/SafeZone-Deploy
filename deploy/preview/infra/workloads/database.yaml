@@ -1,0 +1,13 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: safezone-db
+  namespace: safezone-preview
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  name: safezone
+  owner: postgres
+  databaseReclaimPolicy: retain
+  cluster:
+    name: db-primary

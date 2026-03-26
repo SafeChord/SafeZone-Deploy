@@ -3,6 +3,8 @@ kind: Cluster
 metadata:
   name: db-primary
   namespace: safezone-preview
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   instances: 1 
   imageName: ghcr.io/cloudnative-pg/postgresql:17.7
@@ -16,11 +18,6 @@ spec:
 
   superuserSecret:
       name: k3han-db-secrets
-
-  bootstrap:
-    initdb:
-      database: safezone
-      owner: postgres
 
   postgresql:
     parameters:
