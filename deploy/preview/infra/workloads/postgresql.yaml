@@ -23,4 +23,4 @@ spec:
     parameters:
       max_slot_wal_keep_size: "1GB"
     pg_hba:
-      - host all postgres all scram-sha-256
+      - host all all all scram-sha-256
