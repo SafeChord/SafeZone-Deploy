@@ -3,9 +3,11 @@ kind: Job
 metadata:
   name: db-init-safezone-role
   namespace: safezone-preview
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   backoffLimit: 3
-  ttlSecondsAfterFinished: 300
   template:
     spec:
       restartPolicy: Never
@@ -52,3 +54,5 @@ spec:
                 END
                 \$\$;
               "
+              echo "Role created/updated. Sleeping 30s for ordering verification..."
+              sleep 30
