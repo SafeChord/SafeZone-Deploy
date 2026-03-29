@@ -54,5 +54,3 @@ spec:
                 END
                 \$\$;
               "
-              echo "Role created/updated. Sleeping 30s for ordering verification..."
-              sleep 30
