@@ -1,5 +1,5 @@
 global:
-  environment: staging # preview environment setting should be "staging" (only three options: dev、staging or production)
+  environment: preview # REQUIRED: Environment name (e.g., dev, preview, staging, production)
   ghcr:
     imagePullSecrets: ghcr-pull-secret 
   database:

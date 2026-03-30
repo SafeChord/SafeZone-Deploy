@@ -1,6 +1,6 @@
 # umbrella values for the safezone project
 global:
-  environment: "staging" # REQUIRED: Environment name (e.g., dev, staging, production)
+  environment: "preview" # REQUIRED: Environment name (e.g., dev, preview, staging, production)
   ghcr:
     imagePullSecret: ghcr-pull-secret
   database:
@@ -14,6 +14,8 @@ global:
     existingSecret: safezone-cache-secrets
   kafka:
     brokers: k3han-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+    topic: "preview.covid.case.data"
+    consumerGroup: "safezone-worker-group"
 
 # readPipeline subchart contains the analytics API and dashboard
 readPipeline:

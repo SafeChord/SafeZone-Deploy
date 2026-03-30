@@ -18,7 +18,7 @@ global:
     brokers: "" 
 
     # REQUIRED: Kafka topic for the worker to consume messages from
-    topic: "covid-case-data"
+    topic: "covid.case.data"
     
     # REQUIRED: Kafka consumer group ID for the worker
     consumerGroup: "safezone-worker-group"

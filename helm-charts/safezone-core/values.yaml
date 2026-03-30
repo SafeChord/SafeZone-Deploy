@@ -39,6 +39,8 @@ global:
     existingSecret: "" 
   
   cache:
+    host: "" # REQUIRED: Cache Redis host (e.g., valkey-cache.safezone-preview.svc.cluster.local)
+    port: 6379 # Optional: Cache Redis port
     # REQUIRED: Name of the Kubernetes Secret containing cache (Redis) credentials
     # The secret must include the key `redis-password`
     # Cache (Redis) reference: https://redis.io/docs/management/security/security-redis-password/
@@ -47,6 +49,12 @@ global:
   kafka:
     # REQUIRED: Comma-separated list of Kafka brokers (e.g., broker1:9092,broker2:9092)
     brokers: ""
+
+    # REQUIRED: Kafka topic for data pipeline
+    topic: "covid.case.data"
+
+    # REQUIRED: Kafka consumer group ID for the worker
+    consumerGroup: "safezone-worker-group"
 
   # You can customize the service names and ports based on your deployment
   # These settings are used in the subcharts to configure service endpoints 
