@@ -4,6 +4,8 @@ global:
     imagePullSecrets: ghcr-pull-secret 
 
 dashboard:
+  image:
+    tag: 0.2.1-preview
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
