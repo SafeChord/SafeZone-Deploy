@@ -3,8 +3,6 @@ kind: Application
 metadata:
   namespace: argocd
   name: safezone-ui
-  annotations:
-    argocd.argoproj.io/sync-wave: "4"
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
