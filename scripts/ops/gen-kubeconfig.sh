@@ -1,12 +1,19 @@
 set -e
-# check service account name argument
+# Usage: gen-kubeconfig.sh <namespace>
+# Example: gen-kubeconfig.sh safezone-preview
+#   → SA: safezone-preview-ci-sa in namespace safezone-preview
+#   → Output: kubeconfig-safezone-preview.yaml
+
 if [ $# -ne 1 ]; then
-  echo "Usage: $0 <service-account-name>"
+  echo "Usage: $0 <namespace>"
   exit 1
 fi
 
+NS="$1"
+SA_NAME="$1-ci-sa"
+
 SERVER=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}')
-TOKEN=$(kubectl -n gitops create token $1-ci-sa --duration=2h)
+TOKEN=$(kubectl -n "$NS" create token "$SA_NAME" --duration=2h)
 CA=$(kubectl config view --raw -o jsonpath='{.clusters[0].cluster.certificate-authority-data}')
 
 cat <<EOF > kubeconfig-$1.yaml
@@ -30,4 +37,4 @@ contexts:
 current-context: $1-context
 EOF
 
-echo "已產生 kubeconfig-$1.yaml"
+echo "Generated kubeconfig-$1.yaml (SA: $SA_NAME in namespace $NS)"

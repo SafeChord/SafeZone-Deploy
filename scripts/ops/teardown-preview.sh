@@ -3,37 +3,40 @@ set -euo pipefail
 
 NAMESPACE="safezone-preview"
 APP_DIR="deploy/preview/app"
-PV_NAME="acer-nfs-1g-1"
+SIMULATOR_PVC="simulator-data-pvc"
+SIMULATOR_PV="acer-nfs-1g-1"
 
-echo "=== Teardown Preview Environment ==="
+echo "=== Teardown Preview App Layer ==="
 
 # 1. Delete ArgoCD Applications (triggers resource-finalizer cleanup)
 echo "[1/3] Deleting ArgoCD Applications..."
 kubectl delete -f "$APP_DIR/" --ignore-not-found
-echo "      ArgoCD Applications deleted. Waiting for namespace resources to terminate..."
+echo "      ArgoCD Applications deleted."
 
-# Wait for pods to fully terminate — pvc-protection finalizer blocks until no pod mounts the PVC
-kubectl wait pod --all --for=delete -n "$NAMESPACE" --timeout=120s 2>/dev/null || true
+# 2. Wait for app-layer pods to terminate (exclude infra: db, valkey)
+echo "[2/3] Waiting for app-layer pods to terminate..."
+APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-seed-schema, safezone-seed-cases)"
+kubectl wait pod -l "$APP_LABELS" --for=delete -n "$NAMESPACE" --timeout=120s 2>/dev/null || true
+echo "      App-layer pods terminated."
 
-# 2. Delete PVCs (safe now that pods are gone)
-echo "[2/3] Deleting PVCs..."
-kubectl delete pvc --all -n "$NAMESPACE" --ignore-not-found --timeout=60s
-echo "      PVCs deleted."
+# 3. Clean up simulator PVC and reset static PV claimRef
+echo "[3/3] Cleaning up simulator PVC/PV..."
+kubectl delete pvc "$SIMULATOR_PVC" -n "$NAMESPACE" --ignore-not-found --timeout=60s
 
-# 3. Reset static PV claimRef so it can be re-bound on next deploy
-if kubectl get pv "$PV_NAME" &>/dev/null; then
-  PV_STATUS=$(kubectl get pv "$PV_NAME" -o jsonpath='{.status.phase}')
+if kubectl get pv "$SIMULATOR_PV" &>/dev/null; then
+  PV_STATUS=$(kubectl get pv "$SIMULATOR_PV" -o jsonpath='{.status.phase}')
   if [ "$PV_STATUS" = "Released" ]; then
-    echo "[3/3] Clearing claimRef on PV $PV_NAME (status: Released -> Available)..."
-    kubectl patch pv "$PV_NAME" --type=json \
+    echo "      Clearing claimRef on PV $SIMULATOR_PV (Released -> Available)..."
+    kubectl patch pv "$SIMULATOR_PV" --type=json \
       -p '[{"op":"remove","path":"/spec/claimRef"}]'
-    echo "      PV $PV_NAME is now Available."
+    echo "      PV $SIMULATOR_PV is now Available."
   else
-    echo "[3/3] PV $PV_NAME status is '$PV_STATUS', skipping claimRef reset."
+    echo "      PV $SIMULATOR_PV status is '$PV_STATUS', skipping claimRef reset."
   fi
 else
-  echo "[3/3] PV $PV_NAME not found, skipping."
+  echo "      PV $SIMULATOR_PV not found, skipping."
 fi
 
 echo ""
-echo "=== Preview teardown complete ==="
+echo "=== Preview app teardown complete ==="
+echo "Note: Infra resources (DB, Valkey, KafkaTopic) are untouched."

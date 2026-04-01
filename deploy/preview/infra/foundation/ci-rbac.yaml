@@ -55,7 +55,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ---
 # Permission 3: Workload inspection in safezone-preview namespace
-# Required for: rollout status, pod exec (health probe), job wait
+# Required for: rollout status, job wait
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -71,9 +71,6 @@ rules:
   - apiGroups: [""]
     resources: ["pods"]
     verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["pods/exec"]
-    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

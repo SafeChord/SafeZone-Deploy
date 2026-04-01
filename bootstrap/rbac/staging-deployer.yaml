@@ -2,14 +2,14 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: safezone-ci-sa
-  namespace: gitops
+  namespace: safezone
 ---
-# Permission 1: Full control of Application CRD
+# Permission 1: Application CRUD in argocd namespace
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: app-crd-role
-  namespace: gitops
+  name: staging-app-crd-role
+  namespace: argocd
 rules:
   - apiGroups: ["argoproj.io"]
     resources: ["applications"]
@@ -18,38 +18,47 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: bind-app-crd
-  namespace: gitops
+  name: staging-bind-app-crd
+  namespace: argocd
 subjects:
   - kind: ServiceAccount
     name: safezone-ci-sa
-    namespace: gitops
+    namespace: safezone
 roleRef:
   kind: Role
-  name: app-crd-role
+  name: staging-app-crd-role
   apiGroup: rbac.authorization.k8s.io
 ---
-# Permission 2: Read job status
+# Permission 2: Workload inspection in safezone namespace
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: read-jobs-role
+  name: staging-workload-role
   namespace: safezone
 rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments"]
+    verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources: ["jobs"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: bind-read-jobs
+  name: staging-bind-workload
   namespace: safezone
 subjects:
   - kind: ServiceAccount
     name: safezone-ci-sa
-    namespace: gitops
+    namespace: safezone
 roleRef:
   kind: Role
-  name: read-jobs-role
+  name: staging-workload-role
   apiGroup: rbac.authorization.k8s.io
