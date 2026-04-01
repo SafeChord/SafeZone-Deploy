@@ -1,85 +1,126 @@
-name: workflow for release branch
+name: Deploy Preview App Layer
 
 on:
-  push:
-    branches:
-      - release*
-      - main
-      - staging
+  workflow_dispatch:
+    inputs:
+      skip_seeding:
+        description: 'Skip DB seeding (schema + cases)'
+        type: boolean
+        default: false
+
 jobs:
   deploy:
     runs-on: self-hosted
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: build low privilege kube config
+      - name: Build low-privilege kubeconfig
         run: |
           set -euo pipefail
-          bash deploy/release-v0.1.0/kube/gen_config.sh 
-        # generate kubeconfig-safezone.yaml
-      
-      - name: set kubeconfig env to new config
-        run: echo "KUBECONFIG=kubeconfig-safezone.yaml" >> $GITHUB_ENV
+          bash scripts/ops/gen-kubeconfig.sh safezone-preview
 
-      - name: Check K8s context
+      - name: Set KUBECONFIG
+        run: echo "KUBECONFIG=kubeconfig-safezone-preview.yaml" >> $GITHUB_ENV
+
+      - name: Verify K8s access
         run: kubectl config get-contexts
 
-      - name: Deploy argocd application for phase infra
+      # ── Phase 1: Foundation (cli-relay, time-server, ingress, configmap) ──
+      - name: Apply foundation
+        run: kubectl apply -f deploy/preview/app/safezone-foundation.yaml
+
+      - name: Wait for foundation healthy
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra.yaml
+          NS="safezone-preview"
+          echo "Waiting for foundation deployments..."
+          for DEPLOY in safezone-cli-relay safezone-time-server; do
+            echo "  waiting for $DEPLOY..."
+            until kubectl get deploy "$DEPLOY" -n "$NS" &>/dev/null && \
+                  kubectl rollout status deploy/"$DEPLOY" -n "$NS" --timeout=120s; do
+              sleep 5
+            done
+          done
+          echo "Foundation is ready."
 
-      - name: Wait 5 seconds for infra deployment
-        run: sleep 5
+      # ── Phase 2: Seed Schema (DDL + static reference data) ──
+      - name: Apply seed-schema
+        if: ${{ !inputs.skip_seeding }}
+        run: kubectl apply -f deploy/preview/app/safezone-seed-schema.yaml
 
-      - name: Deploy argocd application for phase infra-seed
+      - name: Wait for seed-schema job
+        if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-infra-seed.yaml
-      
-      - name: Wait for infra-seed job Create
-        run: sleep 3
+          NS="safezone-preview"
+          LABEL="app.kubernetes.io/instance=safezone-seed-schema"
 
-      - name: Wait for infra-seed job completion
+          echo "Waiting for seed-schema job to appear..."
+          until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
+            sleep 3
+          done
+
+          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
+          echo "Found $JOB, waiting for completion..."
+          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=300s
+          echo "Seed-schema completed."
+
+      # ── Phase 3: Core (analytics-api, ingestor, simulator, pandemic-simulator) ──
+      - name: Apply core
+        run: kubectl apply -f deploy/preview/app/safezone-core.yaml
+
+      - name: Wait for core healthy
         run: |
           set -euo pipefail
-          kubectl wait --for=condition=complete --timeout=600s job/safezone-infra-seed -n safezone || (echo "Job safezone-infra-seed failed" && exit 1)
+          NS="safezone-preview"
+          echo "Waiting for core deployments..."
 
-      - name: Deploy argocd application for phase core
+          for DEPLOY in safezone-analytics-api safezone-ingestor safezone-pandemic-simulator; do
+            echo "  waiting for $DEPLOY..."
+            until kubectl get deploy "$DEPLOY" -n "$NS" &>/dev/null && \
+                  kubectl rollout status deploy/"$DEPLOY" -n "$NS" --timeout=120s; do
+              sleep 5
+            done
+          done
+          echo "Core is ready."
+
+      # ── Phase 4: Seed Cases (covid case data injection) ──
+      - name: Apply seed-cases
+        if: ${{ !inputs.skip_seeding }}
+        run: kubectl apply -f deploy/preview/app/safezone-seed-cases.yaml
+
+      - name: Wait for seed-cases job
+        if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core.yaml
+          NS="safezone-preview"
+          LABEL="app.kubernetes.io/instance=safezone-seed-cases"
 
-      - name: Wait 10 seconds for core deployment
-        run: sleep 10
+          echo "Waiting for seed-cases job to appear..."
+          until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
+            sleep 3
+          done
 
-      - name: Deploy argocd application for phase core-seed
+          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
+          echo "Found $JOB, waiting for completion..."
+          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=600s
+          echo "Seed-cases completed."
+
+      # ── Phase 5: UI (dashboard) ──
+      - name: Apply UI
+        run: kubectl apply -f deploy/preview/app/safezone-ui.yaml
+
+      - name: Wait for UI healthy
         run: |
           set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-core-seed.yaml
-          
-      - name: Wait for core-seed job Create
-        run: sleep 3
-      
-      - name: Wait for core-seed job completion
-        run: |
-          set -euo pipefail
-          kubectl wait --for=condition=complete --timeout=6000s job/safezone-core-seed -n safezone || (echo "Job safezone-core-seed failed" && exit 1)
+          NS="safezone-preview"
+          echo "Waiting for dashboard..."
+          until kubectl get deploy safezone-dashboard -n "$NS" &>/dev/null && \
+                kubectl rollout status deploy/safezone-dashboard -n "$NS" --timeout=120s; do
+            sleep 5
+          done
+          echo "UI is ready."
 
-      - name: Deploy argocd application for phase ui
-        run: |
-          set -euo pipefail
-          kubectl apply -n gitops -f deploy/release-v0.1.0/argocd/staging/apps/safezone-ui.yaml
-
-      - name: Wait 10 seconds for ui deployment
-        run: sleep 10
-
-      - name: Notify deployment completion
-        run: echo "Deployment completed successfully!"
-
-      - name: Cleanup ArgoCD Application if failed
-        if: failure()
-        run: |
-          kubectl get applications -n gitops -o name | grep "safezone-" | xargs -r kubectl delete -n gitops
-          echo "ArgoCD applications for safezone-* have been deleted due to failure."
+      - name: Deployment complete
+        run: echo "Preview app layer deployed successfully!"
