@@ -35,3 +35,5 @@ rolefile.yaml
 .secrets
 
 kubeconfig*.yaml
+# Helm chart dependencies
+**/charts/*.tgz
