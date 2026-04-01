@@ -2,23 +2,20 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-core
-  annotations:
-    argocd.argoproj.io/sync-wave: "2"
+  name: safezone-preview-apps
   finalizers:
     - resources-finalizer.argocd.argoproj.io
+  labels:
+    safezone.io/stage: preview-app
 spec:
   project: safezone
   source:
     repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
     targetRevision: deploy/0.2.1
-    path: helm-charts/safezone-core
-    helm:
-      valueFiles:
-        - values-preview.yaml
+    path: deploy/preview/app
   destination:
     server: https://kubernetes.default.svc
-    namespace: safezone-preview
+    namespace: argocd
   syncPolicy:
     automated:
       prune: true
