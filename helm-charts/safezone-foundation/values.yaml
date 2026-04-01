@@ -1,5 +1,5 @@
 # ---------------------------------
-# Global settings for all charts in the safezone-infra umbrella chart
+# Global settings for all charts in the safezone-foundation umbrella chart
 # These settings can be overridden in individual subcharts if needed
 # ---------------------------------
 global:

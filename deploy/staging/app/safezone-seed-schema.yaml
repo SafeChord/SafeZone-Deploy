@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-seed-data
+  name: safezone-seed-schema
 spec:
   project: safezone
   source:
@@ -11,7 +11,7 @@ spec:
     path: helm-charts/safezone-seed
     helm:
       valueFiles:
-        - values-staging-seeddata.yaml
+        - values-staging-schema.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: safezone

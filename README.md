@@ -18,7 +18,7 @@ It embodies the "Production-Grade" mindset by separating configuration from code
 
 ## **✨ Architectural Highlights**
 
-*   **Modular Helm Strategy**: Utilizes a tiered Helm chart architecture (`infra`, `core`, `ui`, `seed`) to decouple infrastructure dependencies (Postgres, Redis, Kafka) from application logic.
+*   **Modular Helm Strategy**: Utilizes a tiered Helm chart architecture (`foundation`, `core`, `ui`, `seed`) to decouple infrastructure dependencies from application logic.
 *   **Multi-Environment Support**: Structured configurations for `preview`, `staging`, and `production` environments, allowing for safe promotion strategies.
 *   **Preview Environment Automation**: specialized workflows (`build-preview`) to dynamically spin up ephemeral environments for Pull Requests.
 *   **Bootstrap & RBAC**: Includes tooling for cluster bootstrapping and Role-Based Access Control (RBAC) management, ensuring a secure foundation.
@@ -33,7 +33,7 @@ It embodies the "Production-Grade" mindset by separating configuration from code
 ## **📂 Repository Structure**
 
 *   `helm-charts/`: Custom Helm charts defining the application components.
-    *   `safezone-infra`: Foundation services (Databases, Message Brokers).
+    *   `safezone-foundation`: Foundation services (routing, config, support services).
     *   `safezone-core`: Backend microservices and pipelines.
     *   `safezone-ui`: Frontend dashboard.
     *   `safezone-seed`: Data seeding and initialization.

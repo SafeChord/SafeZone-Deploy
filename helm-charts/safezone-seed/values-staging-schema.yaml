@@ -1,12 +1,12 @@
 image:
   pullSecret: ghcr-pull-secret
   
-auth:  
+auth:
   authSecret: safezone-auth-secrets
 
 env:
   environment: "staging"
-
+  
 job:
-  name: "safezone-seed-init"
-  script: "preview/init.sh"
+  name: "safezone-seed-schema"
+  script: "staging/init.sh"
