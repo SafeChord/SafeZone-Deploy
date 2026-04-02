@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE="safezone-preview"
-APPSET_NAME="safezone-preview-infra-stage"
-KAFKA_TOPIC="preview-covid-case-data"
-KAFKA_TOPIC_NS="kafka"
-CNPG_CLUSTER="db-primary"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 # --- Pre-flight: ensure app layer is already gone ---
 echo "=== Teardown Preview Infra Layer ==="
@@ -13,7 +10,7 @@ echo "=== Teardown Preview Infra Layer ==="
 APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.metadata.labels.safezone\.io/stage!="preview-infra")].metadata.name}' 2>/dev/null || true)
 
 if [ -n "$APP_NAMES" ]; then
-  echo "ERROR: App-layer Applications still exist. Run teardown-preview.sh first."
+  echo "ERROR: App-layer Applications still exist. Run teardown.sh first."
   echo "       Found: $APP_NAMES"
   exit 1
 fi
@@ -25,7 +22,7 @@ echo ""
 echo "[1/4] Deleting infra ApplicationSet..."
 kubectl delete applicationset "$APPSET_NAME" -n argocd --ignore-not-found
 echo "      Waiting for child Applications + finalizer cleanup..."
-kubectl wait application -n argocd -l "safezone.io/stage=preview-infra" \
+kubectl wait application -n argocd -l "$INFRA_LABEL" \
   --for=delete --timeout=120s 2>/dev/null || true
 echo "      Finalizer cleanup done."
 
@@ -73,4 +70,4 @@ else
 fi
 
 echo ""
-echo "To redeploy: bash scripts/ops/setup-preview-infra.sh"
+echo "To redeploy: bash scripts/ops/preview/setup-infra.sh"

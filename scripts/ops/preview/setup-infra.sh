@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE="safezone-preview"
-APPSET_MANIFEST="deploy/preview/infra/application.yaml"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 echo "=== Setup Preview Infra Layer ==="
 
@@ -21,7 +21,7 @@ echo ""
 echo "[2/4] Applying infra ApplicationSet..."
 kubectl apply -f "$APPSET_MANIFEST"
 echo "      ApplicationSet applied. Waiting for child Applications..."
-until [ "$(kubectl get application -n argocd -l safezone.io/stage=preview-infra --no-headers 2>/dev/null | wc -l)" -ge 4 ]; do
+until [ "$(kubectl get application -n argocd -l "$INFRA_LABEL" --no-headers 2>/dev/null | wc -l)" -ge 4 ]; do
   sleep 3
 done
 echo "      4 child Applications created."
@@ -41,13 +41,13 @@ done
 echo ""
 echo "[4/4] Verifying key workloads..."
 
-echo "  Waiting for CNPG Cluster 'db-primary' to be ready..."
-until kubectl get cluster.postgresql.cnpg.io db-primary -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do
+echo "  Waiting for CNPG Cluster '$CNPG_CLUSTER' to be ready..."
+until kubectl get cluster.postgresql.cnpg.io "$CNPG_CLUSTER" -n "$NAMESPACE" -o jsonpath='{.status.phase}' 2>/dev/null | grep -q "Cluster in healthy state"; do
   sleep 5
 done
 echo "  CNPG Cluster is healthy."
 
-for STS in valkey-cache valkey-state; do
+for STS in $VALKEY_STATEFULSETS; do
   echo "  Waiting for $STS..."
   kubectl rollout status statefulset/"$STS" -n "$NAMESPACE" --timeout=120s
 done

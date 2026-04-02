@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-NAMESPACE="safezone-preview"
-APP_DIR="deploy/preview/app"
-SIMULATOR_PVC="simulator-data-pvc"
-SIMULATOR_PV="acer-nfs-1g-1"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/env.sh"
 
 echo "=== Teardown Preview App Layer ==="
 
@@ -15,7 +13,6 @@ echo "      ArgoCD Applications deleted."
 
 # 2. Wait for app-layer pods to terminate (exclude infra: db, valkey)
 echo "[2/3] Waiting for app-layer pods to terminate..."
-APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-seed-schema, safezone-seed-cases)"
 kubectl wait pod -l "$APP_LABELS" --for=delete -n "$NAMESPACE" --timeout=120s 2>/dev/null || true
 echo "      App-layer pods terminated."
 
