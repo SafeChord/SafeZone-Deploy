@@ -24,6 +24,8 @@ spec:
       name: 'preview-infra-{{stage}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
       labels:
         safezone.io/stage: preview-infra
         safezone.io/component: '{{stage}}'

@@ -40,3 +40,27 @@ fi
 echo ""
 echo "=== Preview app teardown complete ==="
 echo "Note: Infra resources (DB, Valkey, KafkaTopic) are untouched."
+
+# --- Verify ---
+echo ""
+echo "--- Verify ---"
+REMAINING=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.metadata.labels.safezone\.io/stage!="preview-infra")].metadata.name}' 2>/dev/null || true)
+if [ -z "$REMAINING" ]; then
+  echo "  ArgoCD app-layer Applications: CLEAN"
+else
+  echo "  WARNING: app-layer Applications still found: $REMAINING"
+fi
+
+APP_PODS=$(kubectl get pod -n "$NAMESPACE" -l "$APP_LABELS" --no-headers 2>/dev/null | wc -l)
+if [ "$APP_PODS" -eq 0 ]; then
+  echo "  App-layer pods: CLEAN"
+else
+  echo "  WARNING: $APP_PODS app-layer pod(s) still running"
+fi
+
+if kubectl get pv "$SIMULATOR_PV" &>/dev/null; then
+  PV_CHECK=$(kubectl get pv "$SIMULATOR_PV" -o jsonpath='{.status.phase}')
+  echo "  PV $SIMULATOR_PV: $PV_CHECK"
+else
+  echo "  PV $SIMULATOR_PV: NOT FOUND (will be recreated by infra)"
+fi
