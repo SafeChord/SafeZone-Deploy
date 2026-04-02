@@ -66,17 +66,10 @@ else
   echo "  Namespace $NAMESPACE: CLEAN"
 fi
 
-TOPIC_EXISTS=$(kubectl get kafkatopic "$KAFKA_TOPIC" -n "$KAFKA_TOPIC_NS" --no-headers 2>/dev/null | wc -l)
-if [ "$TOPIC_EXISTS" -eq 0 ]; then
-  echo "  KafkaTopic $KAFKA_TOPIC: CLEAN"
-else
+if kubectl get kafkatopic "$KAFKA_TOPIC" -n "$KAFKA_TOPIC_NS" &>/dev/null; then
   echo "  WARNING: KafkaTopic $KAFKA_TOPIC still exists"
-fi
-
-if kubectl get pv "$SIMULATOR_PV" &>/dev/null; then
-  echo "  WARNING: PV $SIMULATOR_PV still exists ($(kubectl get pv "$SIMULATOR_PV" -o jsonpath='{.status.phase}'))"
 else
-  echo "  PV $SIMULATOR_PV: CLEAN (will be recreated by setup)"
+  echo "  KafkaTopic $KAFKA_TOPIC: CLEAN"
 fi
 
 echo ""
