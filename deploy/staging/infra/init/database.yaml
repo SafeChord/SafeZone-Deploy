@@ -1,0 +1,11 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: safezone-db
+  namespace: database
+spec:
+  name: safezone
+  owner: safezone
+  databaseReclaimPolicy: retain
+  cluster:
+    name: db-primary

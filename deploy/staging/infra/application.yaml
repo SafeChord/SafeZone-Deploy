@@ -16,11 +16,16 @@ spec:
           - stage: workloads
             path: deploy/staging/infra/workloads
             wave: "2"
+          - stage: init
+            path: deploy/staging/infra/init
+            wave: "3"
   template:
     metadata:
       name: 'staging-infra-{{stage}}'
       annotations:
         argocd.argoproj.io/sync-wave: '{{wave}}'
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
       labels:
         safezone.io/stage: staging-infra
         safezone.io/component: '{{stage}}'

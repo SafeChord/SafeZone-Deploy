@@ -5,7 +5,7 @@ auth:
   authSecret: safezone-auth-secrets
 
 env:
-  environment: "staging"
+  environment: "preview"
   relayTimeout: 5400 # set a longer timeout for seeding job
 
 job:

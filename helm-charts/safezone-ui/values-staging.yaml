@@ -1,0 +1,17 @@
+global:
+  environment: staging
+  ghcr:
+    imagePullSecrets: ghcr-pull-secret
+
+dashboard:
+  image:
+    tag: 0.2.1
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values:
+                  - always

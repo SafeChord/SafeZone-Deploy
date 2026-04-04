@@ -3,17 +3,19 @@ global:
   environment: "staging"
   ghcr:
     imagePullSecret: ghcr-pull-secret
-  db:
-    secret: k3han-db-secrets
+  database:
+    existingSecret: k3han-db-secrets
   redis:
-    host: bitnami-redis-master.system-redis.svc.cluster.local
-    port: 6379
-    statusDB: 0
+    host: valkey.redis.svc.cluster.local
     existingSecret: k3han-redis-secrets
   cache:
+    host: valkey-cache.safezone.svc.cluster.local
+    port: 6379
     existingSecret: safezone-cache-secrets
   kafka:
-    brokers: bitnami-kafka.kafka.svc.cluster.local:9092
+    brokers: k3han-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092
+    topic: "covid.case.data"
+    consumerGroup: "safezone-worker-group"
 
 
 # readPipeline subchart contains the analytics API and dashboard

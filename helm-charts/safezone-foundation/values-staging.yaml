@@ -1,13 +1,15 @@
 global:
-  environment: staging # preview environment setting should be "staging" (only three options: dev、staging or production)
+  environment: staging
   ghcr:
-    imagePullSecrets: ghcr-pull-secret 
+    imagePullSecrets: ghcr-pull-secret
   database:
     existingSecret: k3han-db-secrets
   redis:
-    host: bitnami-redis-master.system-redis.svc.cluster.local
+    host: valkey.redis.svc.cluster.local
     existingSecret: k3han-redis-secrets
   cache:
+    host: valkey-cache.safezone.svc.cluster.local
+    port: 6379
     existingSecret: safezone-cache-secrets
 
 cliRelay:
@@ -55,6 +57,8 @@ cache:
 ingress:
   className: nginx-public
   host: safezone.omh.idv.tw
+  tls:
+    secretName: cloudflare-origin-cert
   dashboard:
     path: /dashboard
   cliRelay:
