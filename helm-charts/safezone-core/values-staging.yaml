@@ -36,7 +36,7 @@ writePipeline:
   simulator:
     volume:
       persistentVolumeClaim:
-        type: "smoke-test"
+        type: "full-data"
         volumeName: "acer-nfs-1g-3"
     affinity:
       nodeAffinity:

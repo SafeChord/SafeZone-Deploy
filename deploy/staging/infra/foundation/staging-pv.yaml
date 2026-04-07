@@ -4,7 +4,7 @@ metadata:
   name: acer-nfs-1g-3
   labels:
     app: safezone-simulator
-    type: smoke-test
+    type: full-data
 spec:
   capacity:
     storage: 1Gi
