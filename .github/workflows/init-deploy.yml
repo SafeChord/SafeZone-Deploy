@@ -63,16 +63,34 @@ jobs:
         run: |
           set -euo pipefail
           LABEL="app.kubernetes.io/instance=safezone-seed-schema"
+          MAX_RETRIES=5
+          RETRY=0
 
           echo "Waiting for seed-schema job to appear..."
           until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
             sleep 3
           done
 
-          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
-          echo "Found $JOB, waiting for completion..."
-          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=300s
-          echo "Seed-schema completed."
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            JOB=$(kubectl get job -n "$NS" -l "$LABEL" \
+              --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)
+            if [ -n "$JOB" ]; then
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: waiting for $JOB..."
+              if kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=60s 2>/dev/null; then
+                echo "Seed-schema completed."
+                break
+              fi
+            else
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: no job found yet..."
+            fi
+            RETRY=$((RETRY + 1))
+            [ $RETRY -lt $MAX_RETRIES ] && sleep 5
+          done
+
+          if [ $RETRY -eq $MAX_RETRIES ]; then
+            echo "ERROR: seed-schema job did not complete after $MAX_RETRIES attempts."
+            exit 1
+          fi
 
       # ── Phase 3: Core (analytics-api, ingestor, simulator, pandemic-simulator) ──
       - name: Apply core
@@ -101,16 +119,34 @@ jobs:
         run: |
           set -euo pipefail
           LABEL="app.kubernetes.io/instance=safezone-seed-cases"
+          MAX_RETRIES=5
+          RETRY=0
 
           echo "Waiting for seed-cases job to appear..."
           until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
             sleep 3
           done
 
-          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
-          echo "Found $JOB, waiting for completion..."
-          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=600s
-          echo "Seed-cases completed."
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            JOB=$(kubectl get job -n "$NS" -l "$LABEL" \
+              --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)
+            if [ -n "$JOB" ]; then
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: waiting for $JOB..."
+              if kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=60s 2>/dev/null; then
+                echo "Seed-cases completed."
+                break
+              fi
+            else
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: no job found yet..."
+            fi
+            RETRY=$((RETRY + 1))
+            [ $RETRY -lt $MAX_RETRIES ] && sleep 5
+          done
+
+          if [ $RETRY -eq $MAX_RETRIES ]; then
+            echo "ERROR: seed-cases job did not complete after $MAX_RETRIES attempts."
+            exit 1
+          fi
 
       # ── Phase 5: UI (dashboard) ──
       - name: Apply UI
