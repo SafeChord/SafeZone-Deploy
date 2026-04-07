@@ -37,6 +37,7 @@ writePipeline:
     volume:
       persistentVolumeClaim:
         type: "smoke-test"
+        volumeName: "acer-nfs-1g-3"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

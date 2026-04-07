@@ -9,6 +9,9 @@ spec:
   resources:
     requests:
       storage: 1Gi
+  {{- if .Values.simulator.volume.persistentVolumeClaim.volumeName }}
+  volumeName: {{ .Values.simulator.volume.persistentVolumeClaim.volumeName }}
+  {{- end }}
   selector:
     matchLabels:
       app: safezone-simulator
