@@ -24,18 +24,18 @@ kubectl run pg-check --rm -i --restart=Never -n "$NAMESPACE" \
   --image=postgres:17-alpine \
   --command -- psql "$DB_URL" -c "SELECT 'PostgreSQL Connection OK' as status;" 2>/dev/null | grep "OK"
 log "SUCCESS: PostgreSQL is reachable via platform service."
-
+ 
 # 2. Valkey State (Chorde platform service, cross-namespace)
 log "\n2. Testing Valkey State (Chorde platform)..."
 VS_PASS=$(kubectl get secret k3han-redis-secrets -n "$NAMESPACE" -o jsonpath="{.data.redis-password}" | base64 --decode)
 
-PONG=$(kubectl run valkey-check --rm -i --restart=Never -n "$NAMESPACE" \
+VS_OUTPUT=$(kubectl run valkey-check --rm -i --restart=Never -n "$NAMESPACE" \
   --image=valkey/valkey:8.1 \
-  --command -- valkey-cli -h valkey.redis.svc.cluster.local -a "$VS_PASS" PING 2>/dev/null | tr -d '[:space:]')
-if [ "$PONG" == "PONG" ]; then
+  --command -- valkey-cli -h valkey.redis.svc.cluster.local --no-auth-warning -a "$VS_PASS" PING 2>/dev/null || true)
+if echo "$VS_OUTPUT" | grep -q "PONG"; then
     log "SUCCESS: Valkey State authenticated (PONG received)."
 else
-    error "FAIL: Valkey State authentication failed. Got: $PONG"
+    error "FAIL: Valkey State authentication failed. Got: $VS_OUTPUT"
     exit 1
 fi
 
@@ -43,8 +43,7 @@ fi
 log "\n3. Testing Valkey Cache..."
 VC_PASS=$(kubectl get secret safezone-cache-secrets -n "$NAMESPACE" -o jsonpath="{.data.redis-password}" | base64 --decode)
 
-PONG=$(kubectl exec -n "$NAMESPACE" valkey-cache-0 -- valkey-cli -a "$VC_PASS" PING | tr -d '[:space:]')
-if [ "$PONG" == "PONG" ]; then
+if kubectl exec -n "$NAMESPACE" valkey-cache-0 -- valkey-cli --no-auth-warning -a "$VC_PASS" PING 2>/dev/null | grep -q "PONG"; then
     log "SUCCESS: Valkey Cache authenticated (PONG received)."
 else
     error "FAIL: Valkey Cache authentication failed."
