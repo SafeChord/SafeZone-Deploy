@@ -1,70 +1,79 @@
 # **SafeZone Deploy**
-[![CI Status](https://img.shields.io/badge/CI-Passing-green?style=for-the-badge)](https://github.com/rebodutch/safezone-deploy/actions)
+[![CI Status](https://img.shields.io/badge/CI-Passing-green?style=for-the-badge)](https://github.com/SafeChord/SafeZone-Deploy/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 The dedicated deployment and infrastructure configuration repository for the **SafeChord** project.
 
-## **🎯 About This Repository (SafeZone-Deploy)**
+## **🎯 About This Repository**
 
-This repository (SafeZone-Deploy) serves as the **infrastructure & deployment layer** of the SafeChord ecosystem. While the `SafeZone` repository focuses on application logic, this repository handles *how* and *where* that application runs.
+SafeZone-Deploy is the **delivery layer** of the SafeChord ecosystem. It takes application artifacts from [**SafeZone**](../SafeZone) and declares *how* and *where* they run on the infrastructure platform managed by [**Chorde**](../Chorde).
 
-> 💡 **Context**: This is part of the larger **SafeChord Ecosystem**. It acts as the bridge, taking the application artifacts from [**SafeZone**](../SafeZone) and deploying them onto the infrastructure platform managed by [**Chorde**](../Chorde).
-
-It embodies the "Production-Grade" mindset by separating configuration from code, ensuring that deployment processes are:
-
-*   **Declarative**: Defined as code (IaC) using Helm and Kubernetes manifests.
-*   **Reproducible**: Consistent environments from local preview to production.
-*   **Automated**: Tightly integrated with CI/CD pipelines for continuous delivery.
+Deployment is fully **GitOps-driven**: every push to this repository is picked up by ArgoCD and reconciled against the live cluster. There is no manual `helm install`.
 
 ## **✨ Architectural Highlights**
 
-*   **Modular Helm Strategy**: Utilizes a tiered Helm chart architecture (`foundation`, `core`, `ui`, `seed`) to decouple infrastructure dependencies from application logic.
-*   **Multi-Environment Support**: Structured configurations for `preview`, `staging`, and `production` environments, allowing for safe promotion strategies.
-*   **Preview Environment Automation**: specialized workflows (`build-preview`) to dynamically spin up ephemeral environments for Pull Requests.
-*   **Bootstrap & RBAC**: Includes tooling for cluster bootstrapping and Role-Based Access Control (RBAC) management, ensuring a secure foundation.
+- **Modular Helm Charts**: Tiered chart architecture (`foundation`, `core`, `ui`, `seed`) decouples infrastructure dependencies from application logic.
+- **Multi-Environment Support**: Separate configurations for `preview` (ephemeral, PR-scoped) and `staging` (persistent, soak-test target).
+- **GitOps via ArgoCD**: All environments are managed as ArgoCD Applications. Sync is automatic on commit.
+- **Sealed Secrets**: All secrets are encrypted via Bitnami Sealed Secrets before committing. Plaintext lives only in `unsealed/` (gitignored).
+- **Daily Simulation Scheduler**: Staging runs a CronJob (`safezone-scheduler`) that simulates one new day of data per day, driven by the time-server's system date.
 
 ## **💻 Tech Stack**
 
-*   **Orchestration**: Kubernetes
-*   **Package Management**: Helm (Umbrella Chart pattern)
-*   **CI/CD**: GitHub Actions
-*   **Scripting**: Bash (Bootstrap & Utilities)
+- **Orchestration**: Kubernetes (K3s)
+- **Package Management**: Helm
+- **GitOps**: ArgoCD
+- **CI/CD**: GitHub Actions (`init-deploy.yml`)
+- **Secrets Management**: Bitnami Sealed Secrets
 
 ## **📂 Repository Structure**
 
-*   `helm-charts/`: Custom Helm charts defining the application components.
-    *   `safezone-foundation`: Foundation services (routing, config, support services).
-    *   `safezone-core`: Backend microservices and pipelines.
-    *   `safezone-ui`: Frontend dashboard.
-    *   `safezone-seed`: Data seeding and initialization.
-*   `deploy/`: Environment-specific configurations and overrides.
-    *   `preview/`: Ephemeral environments for testing.
-    *   `staging/` & `production/`: Stable long-running environments.
-*   `bootstrap/`: Scripts and manifests for initial cluster setup.
+```
+helm-charts/
+  safezone-common/      # Shared Helm helpers (_helpers.tpl)
+  safezone-foundation/  # Foundation layer: cli-relay, time-server, ingress, configmap
+  safezone-core/        # Core layer: analytics-api, ingestor, simulator, worker
+  safezone-ui/          # UI layer: dashboard
+  safezone-seed/        # Seed jobs (one-shot) and daily simulation CronJob
 
-## **🚀 Quick Start**
+deploy/
+  preview/              # Ephemeral PR sandbox environments
+  staging/              # Persistent staging environment (Chorde PaaS)
+    app/                # ArgoCD Application manifests
+    infra/              # Namespace, RBAC, secrets, workloads
 
-To deploy SafeZone to a Kubernetes cluster, ensuring you have `kubectl` and `helm` installed:
-
-### **1. Bootstrap Cluster**
-
-Initialize your cluster with necessary permissions and base configurations (refer to `bootstrap/README.md` if available, or inspect scripts):
-
-```bash
-# Example usage (refer to actual scripts for details)
-./bootstrap/scripts/gen-kubeconfig.sh
+scripts/
+  ops/
+    gen-kubeconfig.sh   # Generate low-privilege kubeconfig for CI
+    seal-secrets.sh     # Seal all unsealed secrets for an environment
+    staging/            # Manual staging ops (setup, teardown, verify)
+    preview/            # Manual preview ops (setup, teardown, verify)
 ```
 
-### **2. Deploy with Helm**
+## **🚀 Deployment**
 
-Navigate to the specific environment or chart you wish to deploy. For example, to deploy the core services:
+### Staging (GitOps)
+
+Staging is managed entirely via ArgoCD. To deploy or update:
 
 ```bash
-helm install safezone-core ./helm-charts/safezone-core
+# Trigger via GitHub Actions (recommended)
+# → Actions → "Deploy App Layer" → environment: staging
+
+# Or apply ArgoCD Applications directly
+kubectl apply -f deploy/staging/infra/application.yaml
+kubectl apply -f deploy/staging/app/
 ```
 
-*(Note: Specific deployment commands may vary based on the target environment configuration in `deploy/`)*
+### Sealing Secrets
+
+After editing any file in `deploy/<env>/infra/security/unsealed/`:
+
+```bash
+bash scripts/ops/seal-secrets.sh staging
+# commit the updated sealed-*.yaml files
+```
 
 ## **📄 License**
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the MIT License.
