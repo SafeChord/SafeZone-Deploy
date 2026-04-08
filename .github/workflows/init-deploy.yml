@@ -162,5 +162,10 @@ jobs:
           done
           echo "UI is ready."
 
+      # ── Phase 6: Scheduler (staging only) ──
+      - name: Apply scheduler
+        if: ${{ inputs.environment == 'staging' }}
+        run: kubectl apply -f "$APP_DIR/safezone-scheduler.yaml"
+
       - name: Deployment complete
         run: echo "${{ inputs.environment }} app layer deployed successfully!"

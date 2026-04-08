@@ -21,3 +21,8 @@ env:
 job:
   name: "" # REQUIRED: Name of the Kubernetes Job
   script: "" # REQUIRED: Path to the seed script to run in the job container
+
+cronjob:
+  enabled: false
+  schedule: "0 1 * * *" # UTC, default: 1 AM daily
+  script: "" # REQUIRED when enabled: Path to the script to run in the cronjob container
