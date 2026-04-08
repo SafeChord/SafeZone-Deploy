@@ -1,3 +1,4 @@
+{{- if .Values.job.script }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -48,3 +49,4 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.auth.authSecret }}
                   key: refresh_token
+{{- end }}

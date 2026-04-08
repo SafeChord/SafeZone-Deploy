@@ -22,15 +22,26 @@
       "type": "object",
       "properties": {
         "name": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         },
         "script": {
-          "type": "string",
-          "minLength": 1
+          "type": "string"
         }
-      },
-      "required": ["name", "script"]
+      }
+    },
+    "cronjob": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "schedule": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        }
+      }
     },
     "auth": {
       "type": "object",
