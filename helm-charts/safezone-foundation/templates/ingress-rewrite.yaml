@@ -1,3 +1,4 @@
+{{- if .Values.ingress.cliRelay.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -24,6 +25,5 @@ spec:
               service:
                 name: "{{ include "safezone.cliRelay.basename" . }}"
                 port:
-                  name: http   
- 
-
+                  name: http
+{{- end }}

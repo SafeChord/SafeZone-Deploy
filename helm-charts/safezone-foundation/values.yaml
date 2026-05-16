@@ -128,4 +128,5 @@ ingress:
   dashboard:
     path: /dashboard  # Path for the dashboard ingress
   cliRelay:
+    enabled: true  # Set to false to disable CLI Relay ingress (mitigates CVE-2026-42945)
     path: /cli  # Path for the CLI Relay ingress
