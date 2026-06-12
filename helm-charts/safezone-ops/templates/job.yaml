@@ -1,4 +1,4 @@
-{{- if .Values.job.script }}
+{{- if .Values.job.name }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -19,9 +19,14 @@ spec:
         - name: {{ .Values.job.name}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Always
-          command: 
-            - bash
-            - "scripts/{{ .Values.job.script }}"
+          {{- with .Values.job.command }}
+          command:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.job.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: ENVIRONMENT
               value: {{ .Values.env.environment | quote }}
@@ -38,7 +43,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.auth.authSecret }}
-                  key: client_id 
+                  key: client_id
             - name: CLIENT_SECRET
               valueFrom:
                 secretKeyRef:

@@ -1,6 +1,5 @@
 image:
   pullSecret: ghcr-pull-secret
-  tag: 0.2.1-daily
 
 auth:
   authSecret: safezone-auth-secrets
@@ -12,4 +11,4 @@ env:
 cronjob:
   enabled: true
   schedule: "0 1 * * *" # UTC 01:00, approx. 09:00 TWN
-  script: "staging/daily_simulate.sh"
+  command: [bash, /app/routines/staging/daily_simulate.sh]

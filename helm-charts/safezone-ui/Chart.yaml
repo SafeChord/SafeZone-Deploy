@@ -2,13 +2,16 @@ apiVersion: v2
 name: safezone-ui
 description: Umbrella chart for SafeZone project
 type: application
-version: 0.2.1
+version: 0.3.6
 appVersion: "multi"
 
 dependencies:
 - name: safezone-common
-  version: 0.1.0
+  version: 0.3.6
   repository: "file://../safezone-common"
 - name: dashboard
-  version: 0.2.1
+  version: 0.3.6
   repository: "file://charts/dashboard"
+- name: dashboard-v2
+  version: 0.3.6
+  repository: "file://charts/dashboard-v2"

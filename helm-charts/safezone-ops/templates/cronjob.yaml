@@ -22,9 +22,14 @@ spec:
             - name: daily-simulate
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: Always
+              {{- with .Values.cronjob.command }}
               command:
-                - bash
-                - "scripts/{{ .Values.cronjob.script }}"
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
+              {{- with .Values.cronjob.args }}
+              args:
+                {{- toYaml . | nindent 16 }}
+              {{- end }}
               env:
                 - name: ENVIRONMENT
                   value: {{ .Values.env.environment | quote }}

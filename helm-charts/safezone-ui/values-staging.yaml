@@ -5,7 +5,18 @@ global:
 
 dashboard:
   image:
-    tag: 0.2.1
+    tag: 0.2.1 # Phase C: point at the official release tag on promotion
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: chorde.io/avail
+                operator: In
+                values:
+                  - always
+
+dashboard-v2:
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

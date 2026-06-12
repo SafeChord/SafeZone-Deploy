@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.dashboardV2.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: dashboard-v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dashboard-v2
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: dashboard-v2
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecrets }}
+      containers:
+        - name: dashboard-v2
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+          volumeMounts:
+            # nginx.conf is decoupled from the image: compose mounts the local
+            # file, K8s mounts this ConfigMap.
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: {{ include "safezone.dashboardV2.basename" . }}-nginx
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}

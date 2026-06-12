@@ -1,9 +1,12 @@
 dependencies:
 - name: safezone-common
   repository: file://../safezone-common
-  version: 0.1.0
+  version: 0.3.6
 - name: dashboard
   repository: file://charts/dashboard
-  version: 0.2.1
-digest: sha256:13dc6d47312c42c65f38d6e4c9a0cf416aba1be2bda7dcd9cfd1ea8b1a66188e
-generated: "2025-10-28T01:30:00.793878993Z"
+  version: 0.3.6
+- name: dashboard-v2
+  repository: file://charts/dashboard-v2
+  version: 0.3.6
+digest: sha256:a1090de0b199e259f511acd9b73d2e1303c1e2f55f3b111806d890ea598cd8d8
+generated: "2026-06-12T00:00:49.087714801Z"

@@ -13,6 +13,8 @@ global:
     existingSecret: safezone-cache-secrets
 
 cliRelay:
+  image:
+    tag: 0.3.6-fa193ee
   auth:
     roleFile: /app/roles.yml
     authSecret: safezone-auth-secrets
@@ -27,6 +29,8 @@ cliRelay:
                   - always
 
 timeServer:
+  image:
+    tag: 0.3.6-fa193ee
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -54,13 +58,5 @@ cache:
                   values:
                     - always
 
-ingress:
-  className: nginx-public
+route:
   host: preview-safezone.omh.idv.tw
-  tls:
-    secretName: cloudflare-origin-cert
-  dashboard:
-    path: /dashboard
-  cliRelay:
-    enabled: false  # Disabled: mitigate CVE-2026-42945 (unnamed PCRE capture in rewrite-target)
-    path: /cli

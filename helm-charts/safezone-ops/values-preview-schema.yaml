@@ -1,0 +1,13 @@
+image:
+  pullSecret: ghcr-pull-secret
+  tag: 0.3.6-fa193ee
+
+auth:
+  authSecret: safezone-auth-secrets
+
+env:
+  environment: "preview"
+
+job:
+  name: "safezone-ops-schema"
+  command: [bash, /app/routines/preview/init.sh]

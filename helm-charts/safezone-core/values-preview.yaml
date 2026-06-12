@@ -20,7 +20,8 @@ global:
 # readPipeline subchart contains the analytics API and dashboard
 readPipeline:
   analyticsAPI:
-    affinity: 
+    tag: 0.3.6-fa193ee
+    affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
           nodeSelectorTerms:
@@ -33,6 +34,7 @@ readPipeline:
 # writePipeline subchart contains the simulator、ingestor and worker
 writePipeline:
   simulator:
+    tag: 0.3.6-fa193ee
     volume:
       persistentVolumeClaim:
         type: "smoke-test"
@@ -46,6 +48,7 @@ writePipeline:
                 values: 
                  - always
   ingestor:
+    tag: 0.3.6-fa193ee
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
@@ -56,6 +59,7 @@ writePipeline:
                 values: 
                  - always
   worker:
+    tag: 0.3.6-fa193ee
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

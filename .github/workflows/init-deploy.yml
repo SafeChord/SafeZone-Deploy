@@ -36,7 +36,7 @@ jobs:
       - name: Verify K8s access
         run: kubectl config get-contexts
 
-      # ── Phase 1: Foundation (cli-relay, time-server, ingress, configmap) ──
+      # ── Phase 1: Foundation (cli-relay, time-server, httproutes, configmap) ──
       - name: Apply foundation
         run: kubectl apply -f "$APP_DIR/safezone-foundation.yaml"
 
@@ -56,13 +56,13 @@ jobs:
       # ── Phase 2: Seed Schema (DDL + static reference data) ──
       - name: Apply seed-schema
         if: ${{ !inputs.skip_seeding }}
-        run: kubectl apply -f "$APP_DIR/safezone-seed-schema.yaml"
+        run: kubectl apply -f "$APP_DIR/safezone-ops-schema.yaml"
 
       - name: Wait for seed-schema job
         if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          LABEL="app.kubernetes.io/instance=safezone-seed-schema"
+          LABEL="app.kubernetes.io/instance=safezone-ops-schema"
           MAX_RETRIES=5
           RETRY=0
 
@@ -109,16 +109,61 @@ jobs:
           done
           echo "Core is ready."
 
+      # ── Phase 3.5: Smoke gate (szcli data-path test through the full pipeline) ──
+      # Runs after core (dimensional data present, pipeline up) and BEFORE
+      # seed-cases: the smoke cleanup truncates covid_cases, so it must never
+      # run after the showcase data lands without a re-seed following.
+      # Gated on !skip_seeding for the same reason. Hard gate: failure fails
+      # the deploy (forward-fix, no rollback in 0.x).
+      - name: Apply smoke
+        if: ${{ !inputs.skip_seeding }}
+        run: kubectl apply -f "$APP_DIR/safezone-ops-smoke.yaml"
+
+      - name: Wait for smoke job (hard gate)
+        if: ${{ !inputs.skip_seeding }}
+        run: |
+          set -euo pipefail
+          LABEL="app.kubernetes.io/instance=safezone-ops-smoke"
+          MAX_RETRIES=5
+          RETRY=0
+
+          echo "Waiting for smoke job to appear..."
+          until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
+            sleep 3
+          done
+
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            JOB=$(kubectl get job -n "$NS" -l "$LABEL" \
+              --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)
+            if [ -n "$JOB" ]; then
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: waiting for $JOB..."
+              if kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=120s 2>/dev/null; then
+                echo "Smoke test passed."
+                break
+              fi
+            else
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: no job found yet..."
+            fi
+            RETRY=$((RETRY + 1))
+            [ $RETRY -lt $MAX_RETRIES ] && sleep 5
+          done
+
+          if [ $RETRY -eq $MAX_RETRIES ]; then
+            echo "ERROR: smoke job did not complete after $MAX_RETRIES attempts."
+            kubectl logs -n "$NS" -l "$LABEL" --tail=100 || true
+            exit 1
+          fi
+
       # ── Phase 4: Seed Cases (covid case data injection) ──
       - name: Apply seed-cases
         if: ${{ !inputs.skip_seeding }}
-        run: kubectl apply -f "$APP_DIR/safezone-seed-cases.yaml"
+        run: kubectl apply -f "$APP_DIR/safezone-ops-cases.yaml"
 
       - name: Wait for seed-cases job
         if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          LABEL="app.kubernetes.io/instance=safezone-seed-cases"
+          LABEL="app.kubernetes.io/instance=safezone-ops-cases"
           MAX_RETRIES=5
           RETRY=0
 
@@ -148,17 +193,20 @@ jobs:
             exit 1
           fi
 
-      # ── Phase 5: UI (dashboard) ──
+      # ── Phase 5: UI (dashboard-v2 SPA + classic dashboard) ──
       - name: Apply UI
         run: kubectl apply -f "$APP_DIR/safezone-ui.yaml"
 
       - name: Wait for UI healthy
         run: |
           set -euo pipefail
-          echo "Waiting for dashboard..."
-          until kubectl get deploy safezone-dashboard -n "$NS" &>/dev/null && \
-                kubectl rollout status deploy/safezone-dashboard -n "$NS" --timeout=120s; do
-            sleep 5
+          echo "Waiting for dashboards..."
+          for DEPLOY in safezone-dashboard safezone-dashboard-v2; do
+            echo "  waiting for $DEPLOY..."
+            until kubectl get deploy "$DEPLOY" -n "$NS" &>/dev/null && \
+                  kubectl rollout status deploy/"$DEPLOY" -n "$NS" --timeout=120s; do
+              sleep 5
+            done
           done
           echo "UI is ready."
 

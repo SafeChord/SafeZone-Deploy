@@ -27,7 +27,7 @@ global:
 simulator:
   # simulator container configuration
   image: ghcr.io/rebodutch/safezone-pandemic-simulator
-  tag: 0.2.1
+  tag: 0.3.6
 
   # logging configuration
   logLevel: INFO
@@ -63,7 +63,7 @@ simulator:
 ingestor:
   # ingestor container configuration
   image: ghcr.io/rebodutch/safezone-data-ingestor
-  tag: 0.2.1
+  tag: 0.3.6
   
   # logging configuration
   logLevel: INFO
@@ -75,7 +75,7 @@ ingestor:
 worker:
   # worker container configuration
   image: ghcr.io/rebodutch/safezone-worker
-  tag: 0.2.1
+  tag: 0.3.6
   
   # logging configuration
   logLevel: INFO

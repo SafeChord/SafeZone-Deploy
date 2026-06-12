@@ -2,5 +2,5 @@ apiVersion: v2
 name: safezone-common
 description: A library of common helpers for SafeZone charts
 type: library
-version: 0.1.0
+version: 0.3.6
 appVersion: "1.0.0"

@@ -81,7 +81,7 @@ readPipeline:
   analyticsAPI:
     # analytics API container configuration
     image: ghcr.io/rebodutch/safezone-analytics-api
-    tag: 0.2.1
+    tag: 0.3.6
 
     # logging configuration
     logLevel: INFO
@@ -103,7 +103,7 @@ writePipeline:
   simulator:
     # simulator container configuration
     image: ghcr.io/rebodutch/safezone-pandemic-simulator
-    tag: 0.2.1
+    tag: 0.3.6
 
     # logging configuration
     logLevel: INFO
@@ -139,7 +139,7 @@ writePipeline:
   ingestor:
     # ingestor container configuration
     image: ghcr.io/rebodutch/safezone-data-ingestor
-    tag: 0.2.1
+    tag: 0.3.6
     
     # logging configuration
     logLevel: INFO
@@ -151,7 +151,7 @@ writePipeline:
   worker:
     # worker container configuration
     image: ghcr.io/rebodutch/safezone-worker
-    tag: 0.2.1
+    tag: 0.3.6
     
     # logging configuration
     logLevel: INFO

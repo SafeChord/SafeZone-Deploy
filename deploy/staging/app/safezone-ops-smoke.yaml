@@ -2,21 +2,21 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-seed-cases
+  name: safezone-ops-smoke
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: safezone
   source:
     repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
-    targetRevision: deploy/0.2.1
-    path: helm-charts/safezone-seed
+    targetRevision: staging
+    path: helm-charts/safezone-ops
     helm:
       valueFiles:
-        - values-preview-cases.yaml
+        - values-staging-smoke.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: safezone-preview
+    namespace: safezone
   syncPolicy:
     automated:
       prune: true

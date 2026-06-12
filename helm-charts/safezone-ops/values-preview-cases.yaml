@@ -1,7 +1,8 @@
 image:
   pullSecret: ghcr-pull-secret
-  
-auth:  
+  tag: 0.3.6-fa193ee
+
+auth:
   authSecret: safezone-auth-secrets
 
 env:
@@ -9,5 +10,5 @@ env:
   relayTimeout: 5400 # set a longer timeout for seeding job
 
 job:
-  name: "safezone-seed-cases"
-  script: "preview/seed_data.sh"
+  name: "safezone-ops-cases"
+  command: [bash, /app/routines/preview/seed_data.sh]

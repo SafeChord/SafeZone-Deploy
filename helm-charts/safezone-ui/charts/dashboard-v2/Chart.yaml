@@ -1,0 +1,6 @@
+apiVersion: v2
+name: dashboard-v2
+description: SafeZone Dashboard v2 (React SPA served by nginx)
+type: application
+version: 0.3.6
+appVersion: "0.3.6"
