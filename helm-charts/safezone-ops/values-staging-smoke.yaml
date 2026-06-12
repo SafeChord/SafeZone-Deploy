@@ -9,5 +9,5 @@ env:
 
 job:
   name: "safezone-ops-smoke"
-  # No command override: the image ENTRYPOINT (python smoke_test.py)
-  # runs the default szcli data-path smoke flows via cli-relay.
+  # Default flows (no --flow args): szcli data-path smoke via cli-relay.
+  command: [python, /app/smoke_test.py]
