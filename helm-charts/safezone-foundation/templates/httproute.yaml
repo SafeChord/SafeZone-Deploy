@@ -16,11 +16,12 @@ spec:
   hostnames:
     - {{ .Values.route.host }}
   rules:
-    # SPA backend calls: strip the public prefix, both services root at /.
+    # SPA backend calls live UNDER the dashboard prefix (derived, not separate
+    # values): strip the public prefix, both services root at /.
     - matches:
         - path:
             type: PathPrefix
-            value: /dashboard/api
+            value: {{ .Values.route.paths.dashboard }}/api
       filters:
         - type: URLRewrite
           urlRewrite:
@@ -33,7 +34,7 @@ spec:
     - matches:
         - path:
             type: PathPrefix
-            value: /dashboard/time
+            value: {{ .Values.route.paths.dashboard }}/time
       filters:
         - type: URLRewrite
           urlRewrite:
@@ -43,19 +44,19 @@ spec:
       backendRefs:
         - name: {{ include "safezone.timeServer.basename" . }}
           port: {{ include "safezone.timeServer.port" . }}
-    # Default face: dashboard-v2 SPA (nginx serves index.html under /dashboard/).
+    # Default face: dashboard-v2 SPA (nginx serves index.html under this prefix).
     - matches:
         - path:
             type: PathPrefix
-            value: /dashboard
+            value: {{ .Values.route.paths.dashboard }}
       backendRefs:
         - name: {{ include "safezone.dashboardV2.basename" . }}
           port: {{ include "safezone.dashboardV2.port" . }}
-    # Comparison exhibit: legacy Dash self-prefixes to /dashboard-classic/ — no strip.
+    # Comparison exhibit: legacy Dash self-prefixes to this path — no strip.
     - matches:
         - path:
             type: PathPrefix
-            value: /dashboard-classic
+            value: {{ .Values.route.paths.dashboardClassic }}
       backendRefs:
         - name: {{ include "safezone.dashboard.basename" . }}
           port: {{ include "safezone.dashboard.port" . }}

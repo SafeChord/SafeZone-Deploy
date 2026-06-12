@@ -132,3 +132,10 @@ route:
     name: public-gateway  # Shared NGF gateway the HTTPRoutes attach to
     namespace: nginx-gateway
   host: ""  # REQUIRED: Public host for this environment (e.g., safezone.example.com)
+  paths:
+    # Default UI entry (dashboard-v2 SPA). Its /api and /time backend routes are
+    # derived from this prefix. Must match the SPA build base (vite `base`).
+    dashboard: /dashboard
+    # Legacy Dash comparison exhibit. Must match the app's self-prefix
+    # (Dash `requests_pathname_prefix`) — the route does NOT strip it.
+    dashboardClassic: /dashboard-classic
