@@ -132,6 +132,11 @@ route:
     name: public-gateway  # Shared NGF gateway the HTTPRoutes attach to
     namespace: nginx-gateway
   host: ""  # REQUIRED: Public host for this environment (e.g., safezone.example.com)
+  # Gateway-side request body cap for the dashboard routes (nginx
+  # client_max_body_size; the NGF default is 1m). Dash classic callbacks POST
+  # the full component state (~1.1MB with charts loaded), so this must stay
+  # above the default or the gateway 413s before the app is ever reached.
+  bodyMaxSize: 8m
   paths:
     # Default UI entry (dashboard-v2 SPA). Its /api and /time backend routes are
     # derived from this prefix. Must match the SPA build base (vite `base`).
