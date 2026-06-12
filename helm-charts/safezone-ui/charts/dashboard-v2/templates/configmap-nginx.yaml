@@ -14,6 +14,10 @@ data:
         root /usr/share/nginx/html;
         index index.html;
 
+        # TLS terminates at the gateway, so $scheme here is http — absolute
+        # redirects would bounce clients through an extra http->https hop.
+        absolute_redirect off;
+
         # Trailing-slash entry: nginx only auto-redirects real directories,
         # and the alias'd SPA location never matches the bare prefix.
         location = /dashboard {
