@@ -12,6 +12,10 @@ spec:
       app: dashboard-v2
   template:
     metadata:
+      annotations:
+        # nginx only reads config at startup — roll the pod when the
+        # ConfigMap-mounted conf changes, or updates never take effect.
+        checksum/nginx-conf: {{ include (print $.Template.BasePath "/configmap-nginx.yaml") . | sha256sum }}
       labels:
         {{- include "safezone.selectorLabels" . | nindent 8 }}
         app: dashboard-v2
