@@ -18,6 +18,9 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    permissions:
+      contents: read
+      issues: write  # freight record (see the last step)
     env:
       NS: ${{ inputs.environment == 'staging' && 'safezone' || 'safezone-preview' }}
       APP_DIR: deploy/${{ inputs.environment }}/app
@@ -217,3 +220,32 @@ jobs:
 
       - name: Deployment complete
         run: echo "${{ inputs.environment }} app layer deployed successfully!"
+
+      # ── Freight record (IssueOps) ──
+      # On green preview validation, write the record the app repo's release
+      # gate checks: an issue whose title is matched EXACTLY (never parsed).
+      # Manual validation rounds create the same issue by hand — the issue is
+      # then the operator's sign-off. The release run closes it on promotion.
+      - name: Record validated freight (preview only)
+        if: ${{ inputs.environment == 'preview' && !inputs.skip_seeding }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TAG=$(grep -rh 'tag:' helm-charts/*/values-preview*.yaml | awk '{print $2}' | sort -u)
+          if [ "$(echo "$TAG" | wc -l)" -ne 1 ]; then
+            echo "::error::values pin more than one image tag — this run did not validate a single coherent image set:"
+            echo "$TAG"
+            exit 1
+          fi
+          TITLE="validated: ${TAG} (preview)"
+          if gh issue list --repo "$GITHUB_REPOSITORY" --label freight --state all \
+               --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
+            echo "Freight record already exists: $TITLE"
+            exit 0
+          fi
+          BODY=$(printf 'In-cluster validation passed for `%s` (environment: preview, branch: `%s`).\n\nRun: %s/%s/actions/runs/%s\n\nThe release gate in the app repo matches this title exactly before promoting the digests; it comments and closes this issue at promotion.' \
+            "$TAG" "$GITHUB_REF_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          gh issue create --repo "$GITHUB_REPOSITORY" --label freight \
+            --title "$TITLE" --body "$BODY"
+          echo "Freight record created: $TITLE"
