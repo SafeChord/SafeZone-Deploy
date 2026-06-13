@@ -1,6 +1,6 @@
 image:
   pullSecret: ghcr-pull-secret
-  tag: 0.3.6-fa193ee
+  tag: 0.3.6-6dc8a95
 
 auth:
   authSecret: safezone-auth-secrets

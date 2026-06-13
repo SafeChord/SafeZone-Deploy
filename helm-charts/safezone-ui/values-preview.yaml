@@ -5,7 +5,7 @@ global:
 
 dashboard:
   image:
-    tag: 0.3.6-fa193ee
+    tag: 0.3.6-6dc8a95
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -18,7 +18,7 @@ dashboard:
 
 dashboard-v2:
   image:
-    tag: 0.3.6-fa193ee
+    tag: 0.3.6-6dc8a95
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
