@@ -222,12 +222,15 @@ jobs:
         run: echo "${{ inputs.environment }} app layer deployed successfully!"
 
       # ── Freight record (IssueOps) ──
-      # The candidate's freight issue (opened by the app repo's publish-dev)
-      # gains the `validated` label on a green preview run — the state the
-      # app release gate requires. Title is matched EXACTLY (never parsed).
-      # Find-or-create: a missing announcement (manual validation round, or
-      # publish-dev's cross-repo token gap) never breaks the chain.
-      - name: Mark freight validated (preview only)
+      # Records the AUTOMATED in-cluster result on the candidate's freight issue
+      # — it does NOT add the `validated` label. The automated battery (rollouts,
+      # seed, Phase 3.5 smoke) does not exercise the browser / external-DNS /
+      # gateway-routing surface where this release's bugs actually lived (413,
+      # trailing-slash 404, redirect scheme). `validated` = full GATE 2 incl.
+      # those human-judged checks; it is stamped by the /validate-freight skill
+      # only on explicit human sign-off. Title matched EXACTLY (never parsed);
+      # find-or-create so the issue always exists for the closing checklist.
+      - name: Record automated in-cluster result (preview only)
         if: ${{ inputs.environment == 'preview' && !inputs.skip_seeding }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -248,7 +251,7 @@ jobs:
               --title "$TITLE" --body "Created at validation time (no candidate announcement from publish-dev).")
             NUM="${URL##*/}"
           fi
-          gh issue edit "$NUM" --repo "$GITHUB_REPOSITORY" --add-label validated
-          gh issue comment "$NUM" --repo "$GITHUB_REPOSITORY" \
-            --body "In-cluster validation passed (environment: preview, branch: \`${GITHUB_REF_NAME}\`). Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          echo "Freight #$NUM marked validated: $TITLE"
+          BODY=$(printf '**Automated in-cluster checks passed** (environment: preview, branch: `%s`). Run: %s/%s/actions/runs/%s\n\n- [x] deployment rollouts healthy\n- [x] seed-schema + seed-cases jobs complete\n- [x] Phase 3.5 smoke gate (szcli data-path) green\n\nStill required before the `validated` label (run `/validate-freight %s`):\n- [ ] gateway log scan clean (no 4xx/5xx on dashboard routes)\n- [ ] external-DNS probes (both dashboards, API/time, big-POST != 413, http->301)\n- [ ] human visual check (map renders, charts sensible)' \
+            "$GITHUB_REF_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID" "$TAG")
+          gh issue comment "$NUM" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          echo "Freight #$NUM: automated result recorded (NOT validated — awaiting GATE 2 sign-off)."
