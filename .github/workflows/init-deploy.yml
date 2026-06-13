@@ -222,11 +222,12 @@ jobs:
         run: echo "${{ inputs.environment }} app layer deployed successfully!"
 
       # ── Freight record (IssueOps) ──
-      # On green preview validation, write the record the app repo's release
-      # gate checks: an issue whose title is matched EXACTLY (never parsed).
-      # Manual validation rounds create the same issue by hand — the issue is
-      # then the operator's sign-off. The release run closes it on promotion.
-      - name: Record validated freight (preview only)
+      # The candidate's freight issue (opened by the app repo's publish-dev)
+      # gains the `validated` label on a green preview run — the state the
+      # app release gate requires. Title is matched EXACTLY (never parsed).
+      # Find-or-create: a missing announcement (manual validation round, or
+      # publish-dev's cross-repo token gap) never breaks the chain.
+      - name: Mark freight validated (preview only)
         if: ${{ inputs.environment == 'preview' && !inputs.skip_seeding }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -238,14 +239,16 @@ jobs:
             echo "$TAG"
             exit 1
           fi
-          TITLE="validated: ${TAG} (preview)"
-          if gh issue list --repo "$GITHUB_REPOSITORY" --label freight --state all \
-               --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
-            echo "Freight record already exists: $TITLE"
-            exit 0
+          TITLE="freight: ${TAG}"
+          NUM=$(gh issue list --repo "$GITHUB_REPOSITORY" --label freight --state all \
+            --json number,title --jq ".[] | select(.title == \"$TITLE\") | .number" | head -1)
+          if [ -z "$NUM" ]; then
+            echo "No candidate announcement found — creating the freight issue at validation time."
+            URL=$(gh issue create --repo "$GITHUB_REPOSITORY" --label freight \
+              --title "$TITLE" --body "Created at validation time (no candidate announcement from publish-dev).")
+            NUM="${URL##*/}"
           fi
-          BODY=$(printf 'In-cluster validation passed for `%s` (environment: preview, branch: `%s`).\n\nRun: %s/%s/actions/runs/%s\n\nThe release gate in the app repo matches this title exactly before promoting the digests; it comments and closes this issue at promotion.' \
-            "$TAG" "$GITHUB_REF_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
-          gh issue create --repo "$GITHUB_REPOSITORY" --label freight \
-            --title "$TITLE" --body "$BODY"
-          echo "Freight record created: $TITLE"
+          gh issue edit "$NUM" --repo "$GITHUB_REPOSITORY" --add-label validated
+          gh issue comment "$NUM" --repo "$GITHUB_REPOSITORY" \
+            --body "In-cluster validation passed (environment: preview, branch: \`${GITHUB_REF_NAME}\`). Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          echo "Freight #$NUM marked validated: $TITLE"
