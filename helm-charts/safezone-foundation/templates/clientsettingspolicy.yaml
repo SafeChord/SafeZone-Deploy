@@ -1,0 +1,18 @@
+# Raises the gateway-side request body cap for the dashboard HTTPRoute
+# (NGF-native ClientSettingsPolicy; the data-plane nginx default is 1m).
+# Dash classic callbacks POST the full component state per interaction
+# (~1.1MB with charts loaded) — without this the gateway answers 413 and
+# the request never reaches the app.
+apiVersion: gateway.nginx.org/v1alpha1
+kind: ClientSettingsPolicy
+metadata:
+  name: {{ include "fullname" . }}-dashboard
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: {{ include "fullname" . }}-dashboard
+  body:
+    maxSize: {{ .Values.route.bodyMaxSize }}

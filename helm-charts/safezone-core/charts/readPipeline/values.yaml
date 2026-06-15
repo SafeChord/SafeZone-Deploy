@@ -41,7 +41,7 @@ global:
 analyticsAPI:
   # analytics API container configuration
   image: ghcr.io/rebodutch/safezone-analytics-api
-  tag: 0.2.1
+  tag: 0.3.6
 
   # logging configuration
   logLevel: INFO

@@ -1,0 +1,22 @@
+# HTTP→HTTPS redirect. Attaches to public-gateway's plain HTTP listener and
+# 301s everything for this host to https. Redirect is per-route at this
+# gateway, not global. No backend — RequestRedirect terminates here.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "fullname" . }}-https-redirect
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ .Values.route.gateway.name }}
+      namespace: {{ .Values.route.gateway.namespace }}
+      sectionName: http
+  hostnames:
+    - {{ .Values.route.host }}
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+            statusCode: 301

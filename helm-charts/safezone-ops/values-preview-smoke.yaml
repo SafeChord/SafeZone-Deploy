@@ -1,0 +1,14 @@
+image:
+  pullSecret: ghcr-pull-secret
+  tag: 0.3.6-6dc8a95
+
+auth:
+  authSecret: safezone-auth-secrets
+
+env:
+  environment: "preview"
+
+job:
+  name: "safezone-ops-smoke"
+  # Default flows (no --flow args): szcli data-path smoke via cli-relay.
+  command: [python, /app/smoke_test.py]

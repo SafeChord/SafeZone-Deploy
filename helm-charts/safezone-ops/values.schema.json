@@ -24,8 +24,17 @@
         "name": {
           "type": "string"
         },
-        "script": {
-          "type": "string"
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -38,8 +47,17 @@
         "schedule": {
           "type": "string"
         },
-        "script": {
-          "type": "string"
+        "command": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       }
     },

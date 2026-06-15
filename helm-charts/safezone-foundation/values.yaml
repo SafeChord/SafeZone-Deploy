@@ -64,6 +64,9 @@ global:
     dashboard:
       name: dashboard
       port: 8080
+    dashboardV2:
+      name: dashboard-v2
+      port: 80
 
 # ---------------------------------
 # cli-relay is a service that acts as a relay for command-line interface (CLI) requests.
@@ -73,7 +76,7 @@ global:
 cliRelay:
   image: 
     repository: ghcr.io/rebodutch/safezone-cli-relay # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.2.1
+    tag: 0.3.6
   auth:
     # REQUIRED: Path to the role file within the container
     # This file defines the roles and permissions for CLI Relay operations
@@ -104,7 +107,7 @@ cliRelay:
 timeServer:
   image:
     repository: ghcr.io/rebodutch/safezone-time-server # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.2.1
+    tag: 0.3.6
 
   redis:
     host: "" # Optional: Override global.redis.host for Time Server
@@ -119,14 +122,25 @@ timeServer:
   affinity: {}  # Optional: Node affinity rules for time server pods
 
 # ---------------------------------
-# SafeZone is exposed through an Ingress resource, which is a Kubernetes object that manages external access to services within the cluster.
-# The Ingress resource allows you to define rules for routing external traffic to the appropriate services based on the request's host and path.
+# SafeZone is exposed through Gateway API HTTPRoutes attached to the shared NGF
+# public gateway (TLS terminates at the gateway listener with a wildcard cert,
+# so no per-app TLS config here). Environments differ only by `route.host`.
+# cli-relay is NOT exposed (kept internal since CVE-2026-42945).
 # ----------------------------------
-ingress:
-  className: ""  # Ingress class name (e.g., traefik, nginx)
-  host: ""  # Host for SafeZone ingress (e.g., safezone.example.com)
-  dashboard:
-    path: /dashboard  # Path for the dashboard ingress
-  cliRelay:
-    enabled: true  # Set to false to disable CLI Relay ingress (mitigates CVE-2026-42945)
-    path: /cli  # Path for the CLI Relay ingress
+route:
+  gateway:
+    name: public-gateway  # Shared NGF gateway the HTTPRoutes attach to
+    namespace: nginx-gateway
+  host: ""  # REQUIRED: Public host for this environment (e.g., safezone.example.com)
+  # Gateway-side request body cap for the dashboard routes (nginx
+  # client_max_body_size; the NGF default is 1m). Dash classic callbacks POST
+  # the full component state (~1.1MB with charts loaded), so this must stay
+  # above the default or the gateway 413s before the app is ever reached.
+  bodyMaxSize: 8m
+  paths:
+    # Default UI entry (dashboard-v2 SPA). Its /api and /time backend routes are
+    # derived from this prefix. Must match the SPA build base (vite `base`).
+    dashboard: /dashboard
+    # Legacy Dash comparison exhibit. Must match the app's self-prefix
+    # (Dash `requests_pathname_prefix`) — the route does NOT strip it.
+    dashboardClassic: /dashboard-classic
