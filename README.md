@@ -2,8 +2,6 @@
 [![CI Status](https://img.shields.io/badge/CI-Passing-green?style=for-the-badge)](https://github.com/SafeChord/SafeZone-Deploy/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-> ⚠️ **Soak Testing in Progress**: The `staging` branch is currently undergoing soak testing (v0.2.1). This `main` branch will be updated upon successful completion.
-
 The dedicated deployment and infrastructure configuration repository for the **SafeChord** project.
 
 ## **🎯 About This Repository**

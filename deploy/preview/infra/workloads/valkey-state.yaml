@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: valkey-state
+  namespace: safezone-preview
+  labels:
+    app: valkey-state
+spec:
+  serviceName: valkey-state
+  replicas: 1
+  selector:
+    matchLabels:
+      app: valkey-state
+  template:
+    metadata:
+      labels:
+        app: valkey-state
+    spec:
+      containers:
+        - name: valkey
+          image: valkey/valkey:8.1
+          command: ["sh", "-c", "valkey-server --requirepass $VALKEY_PASSWORD --appendonly yes"]
+          env:
+            - name: VALKEY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: k3han-redis-secrets
+                  key: redis-password
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: data
+              mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: valkey-state
+  namespace: safezone-preview
+spec:
+  ports:
+    - port: 6379
+  selector:
+    app: valkey-state

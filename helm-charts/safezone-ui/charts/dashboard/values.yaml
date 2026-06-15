@@ -1,0 +1,35 @@
+# ---------------------------------
+# Global settings for the dashboard subchart
+# These settings can be overridden in individual subcharts if needed
+# ---------------------------------
+global:
+  safezone:
+    # Optional: Override the full name of the SafeZone deployment
+    fullnameOverride: ""
+
+  environment: "" # REQUIRED: Environment name (e.g., dev,staging, production)
+  
+  ghcr:
+    imagePullSecrets: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
+  
+  # Service discovery settings for inter-service communication
+  # You can customize the service names and ports based on your deployment
+  # These settings are used in the subcharts to configure service endpoints 
+  # And the access URLs for each service in the ConfigMap: safezone-config
+  serviceDiscovery:
+    timeServer:
+      name: time-server
+      port: 8000
+    analyticsAPI:
+      name: analytics-api
+      port: 8000
+    dashboard:
+      name: dashboard
+      port: 8080
+
+image:
+  repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications
+  tag: 0.2.1
+
+logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
+affinity:   # Optional: Node affinity rules for Dashboard pods

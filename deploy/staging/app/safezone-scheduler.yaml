@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  namespace: argocd
+  name: safezone-scheduler
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: safezone
+  source:
+    repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
+    targetRevision: staging
+    path: helm-charts/safezone-seed
+    helm:
+      valueFiles:
+        - values-staging-cronjob.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: safezone
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -1,4 +1,0 @@
-job:
-  script: "/app/scripts/jobs/seed_data.sh"
-env:
-  relayTimeout: 5400

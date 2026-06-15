@@ -1,0 +1,47 @@
+global:
+  ghcr:
+    imagePullSecrets: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
+  redis:
+    host: "" # REQUIRED: System Redis who stores system-level data such as time configuration and system info
+    port: 6379 # Optional: System Redis port, default is 6379
+    statusDB: 0 # Optional: System Redis database number for system status, default is 0
+
+    # REQUIRED: Name of the Kubernetes Secret containing System Redis credentials
+    # The secret must include the key `redis-password`
+    existingSecret: "" # Optional: Global Redis secret for all charts
+  database:
+    existingSecret: "" 
+  cache:
+    # REQUIRED: Name of the Kubernetes Secret containing cache (Redis) credentials
+    # The secret must include the key `redis-password`
+    # Cache (Redis) reference: https://redis.io/docs/management/security/security-redis-password/
+    existingSecret: ""
+  
+
+image: 
+  repository: ghcr.io/rebodutch/safezone-cli-relay # DO NOT CHANGE unless you fully understand its implications
+  tag: 0.2.1 # DO NOT CHANGE unless you fully understand its implications
+
+auth:
+  roleFile: "" # REQUIRED: Path to the role file within the container, e.g., /app/roles.example.yml
+  authSecret: "" # REQUIRED: Name of the Kubernetes Secret containing Google OAuth credentials
+
+database:
+  existingSecret: "" # Optional: Override global.database.existingSecret for CLI Relay
+
+redis:
+  host: "" # Optional: Override global.redis.host for CLI Relay
+  port: "" # Optional: Override global.redis.port for CLI Relay
+  db: "" # Optional: Override global.redis.statusDB for CLI Relay
+  existingSecret: "" # Optional: Override global.redis.existingSecret for CLI Relay
+
+cache:
+  host: "" # Optional: Override global.cache.host for CLI Relay
+  port: "" # Optional: Override global.cache.port for CLI Relay
+  db: "" # Optional: Override global.cache.db for CLI Relay
+  password: "" # Optional: Directly set Redis password for CLI Relay (overrides existingSecret)
+  existingSecret: "" # Optional: Override global.cache.existingSecret for CLI Relay
+
+logLevel: INFO # Optional: Log level (e.g., debug, info, warn, error)
+  
+affinity: {} # Optional: Node affinity rules for CLI Relay pods

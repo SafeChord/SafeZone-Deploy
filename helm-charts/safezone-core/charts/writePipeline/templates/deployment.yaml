@@ -1,0 +1,142 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.pandemicSimulator.basename" . }}
+  labels:
+  {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pandemic-simulator
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: pandemic-simulator
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecret }}
+      containers:
+        - name: pandemic-simulator
+          image: {{ .Values.simulator.image }}:{{ .Values.simulator.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment | quote }}
+            - name: INGESTOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: INGESTOR_URL
+            - name: MAX_CONCURRENT_REQUESTS
+              value: {{ .Values.simulator.async.concurrentRequests | quote }}
+            - name: SERVICE_VERSION
+              value: {{ .Values.simulator.tag | quote }}   
+            - name: SERVICE_PORT
+              value: "8000"
+            - name: LOG_LEVEL
+              value: {{ .Values.simulator.logLevel | quote }}
+          volumeMounts:
+            - name: data-volume
+              mountPath: {{ .Values.simulator.volume.data.filePath }}/{{ .Values.simulator.volume.data.fileName }}
+              readOnly: true
+              subPath: {{ .Values.simulator.volume.data.fileName }}
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.simulator.volume.persistentVolumeClaim.claimName }}
+      affinity:
+        {{- toYaml .Values.simulator.affinity | nindent 8 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.ingestor.basename" . }}
+  labels:
+  {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestor
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: ingestor
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecret }}
+      containers:
+        - name: ingestor
+          image: {{ .Values.ingestor.image }}:{{ .Values.ingestor.tag }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment | quote }}
+            - name: KAFKA_BOOTSTRAP
+              value: {{ .Values.global.kafka.brokers | quote }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.global.kafka.topic | quote }}
+            - name: SERVICE_VERSION
+              value: {{ .Values.ingestor.tag | quote }}   
+            - name: SERVICE_PORT
+              value: "8000"
+            - name: LOG_LEVEL
+              value: {{ .Values.ingestor.logLevel | quote }}
+      affinity:
+        {{- toYaml .Values.ingestor.affinity | nindent 8 }}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.worker.basename" . }}
+  labels:
+  {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: worker
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecret }}
+      containers:
+        - name: worker
+          image: {{ .Values.worker.image }}:{{ .Values.worker.tag }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: ENVIRONMENT
+              value: {{ .Values.global.environment | quote }}
+            - name: KAFKA_BROKER
+              value: {{ .Values.global.kafka.brokers | quote }}
+            - name: KAFKA_TOPIC
+              value: {{ .Values.global.kafka.topic | quote }}
+            - name: KAFKA_GROUP_ID
+              value: {{ .Values.global.kafka.consumerGroup | quote }}
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.database.existingSecret | quote }}
+                  key: db_url
+            - name: BATCH_SIZE
+              value: {{ .Values.worker.batch.size | quote }}
+            - name: FLUSH_INTERVAL
+              value: {{ .Values.worker.batch.flushInterval | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.worker.logLevel | quote }}
+      affinity:
+        {{- toYaml .Values.worker.affinity | nindent 8 }}

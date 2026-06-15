@@ -1,0 +1,6 @@
+apiVersion: v2
+name: writePipeline
+description: SafeZone Write Pipeline Services (pandemic simulator、data ingestor、worker)
+type: application
+version: 0.2.1
+appVersion: "multi-image"

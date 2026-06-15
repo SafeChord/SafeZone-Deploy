@@ -1,0 +1,115 @@
+#!/usr/bin/env bash
+# pre-commit: Validate Helm charts before commit.
+#
+# Install:
+#   ln -sf ../../scripts/hooks/pre-commit .git/hooks/pre-commit
+#
+# Behaviour:
+#   staging/preview branch  → parse deploy/{branch}/app/*.yaml, mirror exact
+#                             chart + valueFiles combinations that ArgoCD uses
+#   other branches          → skip (main is archive-only; feature branches via PR)
+
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+
+case "$BRANCH" in
+  staging|preview) ;;
+  *)
+    echo "[pre-commit] Branch '$BRANCH': skipping Helm validation."
+    exit 0
+    ;;
+esac
+
+# Only validate if helm-charts/ files are staged
+if ! git diff --cached --name-only | grep -q "^helm-charts/"; then
+  echo "[pre-commit] No helm-charts/ changes staged. Skipping."
+  exit 0
+fi
+
+APP_DIR="$REPO_ROOT/deploy/$BRANCH/app"
+echo "[pre-commit] Branch '$BRANCH': validating charts from $APP_DIR ..."
+
+# Extract (chart_path, values_file) pairs from all Application manifests
+# Output format: "<chart_path>|<values_file>" one per line
+PAIRS="$(python3 - "$APP_DIR" <<'EOF'
+import sys, os, yaml, glob
+
+app_dir = sys.argv[1]
+for fpath in sorted(glob.glob(os.path.join(app_dir, "*.yaml"))):
+    with open(fpath) as f:
+        doc = yaml.safe_load(f)
+    try:
+        source = doc["spec"]["source"]
+        chart_path = source["path"]
+        value_files = source.get("helm", {}).get("valueFiles", [])
+        for vf in value_files:
+            print(f"{chart_path}|{vf}")
+    except (KeyError, TypeError):
+        pass
+EOF
+)"
+
+if [[ -z "$PAIRS" ]]; then
+  echo "[pre-commit] No Helm Application pairs found — check $APP_DIR"
+  exit 1
+fi
+
+ERRORS=0
+DEP_BUILT=()
+
+while IFS='|' read -r CHART_PATH VALUES_FILE; do
+  CHART_DIR="$REPO_ROOT/$CHART_PATH"
+  CHART_NAME="$(basename "$CHART_DIR")"
+  VALUES_PATH="$CHART_DIR/$VALUES_FILE"
+
+  # Run helm dependency build once per chart (local file:// deps need packaging)
+  if [[ ! " ${DEP_BUILT[*]} " =~ " ${CHART_DIR} " ]]; then
+    echo ""
+    echo "── $CHART_NAME ──"
+    if ! DEP_OUT=$(helm dependency build "$CHART_DIR" 2>&1); then
+      echo "  [FAIL] helm dependency build"
+      echo "$DEP_OUT" | sed 's/^/         /'
+      ERRORS=$((ERRORS + 1))
+      DEP_BUILT+=("$CHART_DIR")
+      continue
+    fi
+    DEP_BUILT+=("$CHART_DIR")
+  fi
+
+  # Validate values file exists
+  if [[ ! -f "$VALUES_PATH" ]]; then
+    echo "  [FAIL] values file not found: $VALUES_FILE"
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+
+  # Lint with actual values (validates schema against real values, not empty defaults)
+  if helm lint "$CHART_DIR" --values "$VALUES_PATH" --quiet 2>&1; then
+    echo "  [OK]   helm lint ($VALUES_FILE)"
+  else
+    echo "  [FAIL] helm lint ($VALUES_FILE)"
+    helm lint "$CHART_DIR" --values "$VALUES_PATH" 2>&1 | sed 's/^/         /'
+    ERRORS=$((ERRORS + 1))
+    continue
+  fi
+
+  # Template render
+  if helm template "$CHART_NAME" "$CHART_DIR" --values "$VALUES_PATH" > /dev/null 2>&1; then
+    echo "  [OK]   helm template ($VALUES_FILE)"
+  else
+    echo "  [FAIL] helm template ($VALUES_FILE)"
+    helm template "$CHART_NAME" "$CHART_DIR" --values "$VALUES_PATH" 2>&1 | sed 's/^/         /'
+    ERRORS=$((ERRORS + 1))
+  fi
+done <<< "$PAIRS"
+
+echo ""
+if [[ $ERRORS -gt 0 ]]; then
+  echo "[pre-commit] $ERRORS error(s) found. Commit blocked."
+  exit 1
+fi
+
+echo "[pre-commit] All charts valid. Proceeding."
+exit 0

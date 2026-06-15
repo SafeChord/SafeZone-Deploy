@@ -18,6 +18,31 @@
       },
       "required": ["pullSecret"]
     },
+    "job": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        }
+      }
+    },
+    "cronjob": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "schedule": {
+          "type": "string"
+        },
+        "script": {
+          "type": "string"
+        }
+      }
+    },
     "auth": {
       "type": "object",
       "properties": {
@@ -27,20 +52,7 @@
         }
       },
       "required": ["authSecret"]
-    },
-    "job": {
-      "type": "object",
-      "properties": {
-        "script": {
-          "type": "string",
-          "minLength": 1
-        }
-      },
-      "required": ["script"]
-    },
-    "env": {
-      "type": "object"
     }
   },
-  "required": ["image", "auth", "job"]
+  "required": ["image", "auth"]
 }

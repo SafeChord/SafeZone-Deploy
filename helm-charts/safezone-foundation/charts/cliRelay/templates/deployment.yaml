@@ -1,0 +1,164 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "safezone.cliRelay.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+  app: cli-relay
+spec:
+  selector:
+    matchLabels:
+      app: cli-relay
+  template:
+    metadata:
+      labels:
+        {{- include "safezone.selectorLabels" . | nindent 8 }}
+        app: cli-relay
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.global.ghcr.imagePullSecrets }}
+      containers:
+        - name: cli-relay
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          ports:
+            - containerPort: 8000
+          env:
+            - name: ENVIRONMENT
+              value: {{ default "staging" .Values.global.environment | quote }}
+            # db_secret connection settings
+            - name: DB_URL
+              {{- if .Values.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: db_url
+              {{- else if .Values.global.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.database.existingSecret }}
+                  key: db_url
+              {{- else }}
+              value: "postgresql://user:password@localhost:5432/safezone"
+              {{- end }}
+            - name: REPLICA_URL
+              {{- if .Values.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.existingSecret }}
+                  key: replica_url
+              {{- else if .Values.global.database.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.database.existingSecret }}
+                  key: replica_url
+              {{- else }}
+              value: "postgresql://user:password@localhost:5432/safezone"
+              {{- end }}
+            # redis_secret connection settings
+            - name: REDIS_HOST
+              value: {{ coalesce .Values.redis.host .Values.global.redis.host "localhost" | quote }}
+            - name: REDIS_PORT
+              value: {{ coalesce .Values.redis.port .Values.global.redis.port 6379 | quote }}
+            - name: REDIS_DB
+              {{- if .Values.redis.db }}
+              value: {{ .Values.redis.db | quote }}
+              {{- else if .Values.global.redis.statusDB }}
+              value: {{ .Values.global.redis.statusDB | quote }}
+              {{- else }}
+              value: "0"
+              {{- end }}
+            - name: REDIS_PASSWORD
+              {{- if .Values.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.redis.existingSecret }}
+                  key: redis-password
+              {{- else if .Values.global.redis.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.global.redis.existingSecret }}
+                  key: redis-password
+              {{- else }}
+              value: ""
+              {{- end }}
+            # cache_secret connection setting
+            - name: CACHE_HOST
+              value: {{ coalesce .Values.cache.host .Values.global.cache.host "localhost" | quote }}
+            - name: CACHE_PORT
+              value: {{ coalesce .Values.cache.port .Values.global.cache.port 6379 | quote }}
+            - name: CACHE_DB
+              value: "0"
+            - name: CACHE_PASSWORD
+              {{- if .Values.cache.password }}
+              value: {{ .Values.cache.password | quote }}
+              {{- else if .Values.cache.existingSecret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.cache.existingSecret }}
+                  key: redis-password
+              {{- else if .Values.global.cache.existingSecret }}
+              valueFrom:  
+                secretKeyRef:
+                  name: {{ .Values.global.cache.existingSecret }}
+                  key: redis-password
+              {{- else }}
+              value: ""
+              {{- end }}
+            # auth_secret settings  
+            - name: CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.auth.authSecret }}
+                  key: client_id 
+            # configMap connection settings
+            - name: SIMULATOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: SIMULATOR_URL
+            - name: INGESTOR_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: INGESTOR_URL
+            - name: ANALYTICS_API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: ANALYTICS_API_URL
+            - name: DASHBOARD_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: DASHBOARD_URL
+            - name: TIME_SERVER_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ include "fullname" . }}-config
+                  key: TIME_SERVER_URL
+            - name: MKDOC_URL
+              value: "http://placeholder.local"
+            # role file settings
+            - name: ROLE_FILE
+              value: {{ .Values.auth.roleFile | quote }}
+            # default app settings
+            - name: SERVICE_VERSION
+              value: {{ .Values.image.tag | quote }}   
+            - name: SERVICE_PORT
+              value: "8000"
+            - name: LOG_LEVEL
+              value: {{ .Values.logLevel | quote }}
+          # mounts for role file
+          volumeMounts:
+            - name: rolefile
+              mountPath: {{ .Values.auth.roleFile | quote }}
+              subPath: rolefile.yaml
+      volumes:
+        - name: rolefile
+          secret:
+            secretName: safezone-role-secrets
+            items:
+              - key: rolefile.yaml
+                path: rolefile.yaml
+      affinity:
+        {{- toYaml .Values.affinity | nindent 8 }}

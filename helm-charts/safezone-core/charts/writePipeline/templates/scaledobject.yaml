@@ -1,0 +1,22 @@
+{{- if .Values.worker.scaling.enabled }}
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: safezone-worker-scaler
+spec:
+  scaleTargetRef:
+    name: {{ include "safezone.worker.basename" . }}
+
+  minReplicaCount: {{ .Values.worker.scaling.minReplicas }}
+  maxReplicaCount: {{ .Values.worker.scaling.maxReplicas }} 
+  pollingInterval: {{ .Values.worker.scaling.pollingInterval }}
+  cooldownPeriod: {{ .Values.worker.scaling.cooldownPeriod }} 
+
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: {{ .Values.global.kafka.brokers | quote }}
+        topic: {{ .Values.global.kafka.topic | quote }}
+        consumerGroup: {{ .Values.global.kafka.consumerGroup | quote }}
+        lagThreshold: {{ .Values.worker.scaling.lagThreshold | quote }} 
+{{- end }}

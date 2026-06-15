@@ -1,8 +1,15 @@
-name: Deploy Preview App Layer
+name: Deploy App Layer
 
 on:
   workflow_dispatch:
     inputs:
+      environment:
+        description: 'Target environment'
+        type: choice
+        options:
+          - preview
+          - staging
+        default: preview
       skip_seeding:
         description: 'Skip DB seeding (schema + cases)'
         type: boolean
@@ -11,6 +18,9 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
+    env:
+      NS: ${{ inputs.environment == 'staging' && 'safezone' || 'safezone-preview' }}
+      APP_DIR: deploy/${{ inputs.environment }}/app
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -18,22 +28,21 @@ jobs:
       - name: Build low-privilege kubeconfig
         run: |
           set -euo pipefail
-          bash scripts/ops/gen-kubeconfig.sh safezone-preview
+          bash scripts/ops/gen-kubeconfig.sh "$NS"
 
       - name: Set KUBECONFIG
-        run: echo "KUBECONFIG=kubeconfig-safezone-preview.yaml" >> $GITHUB_ENV
+        run: echo "KUBECONFIG=kubeconfig-${NS}.yaml" >> $GITHUB_ENV
 
       - name: Verify K8s access
         run: kubectl config get-contexts
 
       # ── Phase 1: Foundation (cli-relay, time-server, ingress, configmap) ──
       - name: Apply foundation
-        run: kubectl apply -f deploy/preview/app/safezone-foundation.yaml
+        run: kubectl apply -f "$APP_DIR/safezone-foundation.yaml"
 
       - name: Wait for foundation healthy
         run: |
           set -euo pipefail
-          NS="safezone-preview"
           echo "Waiting for foundation deployments..."
           for DEPLOY in safezone-cli-relay safezone-time-server; do
             echo "  waiting for $DEPLOY..."
@@ -47,35 +56,50 @@ jobs:
       # ── Phase 2: Seed Schema (DDL + static reference data) ──
       - name: Apply seed-schema
         if: ${{ !inputs.skip_seeding }}
-        run: kubectl apply -f deploy/preview/app/safezone-seed-schema.yaml
+        run: kubectl apply -f "$APP_DIR/safezone-seed-schema.yaml"
 
       - name: Wait for seed-schema job
         if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          NS="safezone-preview"
           LABEL="app.kubernetes.io/instance=safezone-seed-schema"
+          MAX_RETRIES=5
+          RETRY=0
 
           echo "Waiting for seed-schema job to appear..."
           until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
             sleep 3
           done
 
-          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
-          echo "Found $JOB, waiting for completion..."
-          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=300s
-          echo "Seed-schema completed."
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            JOB=$(kubectl get job -n "$NS" -l "$LABEL" \
+              --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)
+            if [ -n "$JOB" ]; then
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: waiting for $JOB..."
+              if kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=60s 2>/dev/null; then
+                echo "Seed-schema completed."
+                break
+              fi
+            else
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: no job found yet..."
+            fi
+            RETRY=$((RETRY + 1))
+            [ $RETRY -lt $MAX_RETRIES ] && sleep 5
+          done
+
+          if [ $RETRY -eq $MAX_RETRIES ]; then
+            echo "ERROR: seed-schema job did not complete after $MAX_RETRIES attempts."
+            exit 1
+          fi
 
       # ── Phase 3: Core (analytics-api, ingestor, simulator, pandemic-simulator) ──
       - name: Apply core
-        run: kubectl apply -f deploy/preview/app/safezone-core.yaml
+        run: kubectl apply -f "$APP_DIR/safezone-core.yaml"
 
       - name: Wait for core healthy
         run: |
           set -euo pipefail
-          NS="safezone-preview"
           echo "Waiting for core deployments..."
-
           for DEPLOY in safezone-analytics-api safezone-ingestor safezone-pandemic-simulator; do
             echo "  waiting for $DEPLOY..."
             until kubectl get deploy "$DEPLOY" -n "$NS" &>/dev/null && \
@@ -88,33 +112,49 @@ jobs:
       # ── Phase 4: Seed Cases (covid case data injection) ──
       - name: Apply seed-cases
         if: ${{ !inputs.skip_seeding }}
-        run: kubectl apply -f deploy/preview/app/safezone-seed-cases.yaml
+        run: kubectl apply -f "$APP_DIR/safezone-seed-cases.yaml"
 
       - name: Wait for seed-cases job
         if: ${{ !inputs.skip_seeding }}
         run: |
           set -euo pipefail
-          NS="safezone-preview"
           LABEL="app.kubernetes.io/instance=safezone-seed-cases"
+          MAX_RETRIES=5
+          RETRY=0
 
           echo "Waiting for seed-cases job to appear..."
           until kubectl get job -n "$NS" -l "$LABEL" -o name 2>/dev/null | grep -q job; do
             sleep 3
           done
 
-          JOB=$(kubectl get job -n "$NS" -l "$LABEL" -o name | head -1)
-          echo "Found $JOB, waiting for completion..."
-          kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=600s
-          echo "Seed-cases completed."
+          while [ $RETRY -lt $MAX_RETRIES ]; do
+            JOB=$(kubectl get job -n "$NS" -l "$LABEL" \
+              --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)
+            if [ -n "$JOB" ]; then
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: waiting for $JOB..."
+              if kubectl wait "$JOB" -n "$NS" --for=condition=complete --timeout=60s 2>/dev/null; then
+                echo "Seed-cases completed."
+                break
+              fi
+            else
+              echo "Attempt $((RETRY+1))/$MAX_RETRIES: no job found yet..."
+            fi
+            RETRY=$((RETRY + 1))
+            [ $RETRY -lt $MAX_RETRIES ] && sleep 5
+          done
+
+          if [ $RETRY -eq $MAX_RETRIES ]; then
+            echo "ERROR: seed-cases job did not complete after $MAX_RETRIES attempts."
+            exit 1
+          fi
 
       # ── Phase 5: UI (dashboard) ──
       - name: Apply UI
-        run: kubectl apply -f deploy/preview/app/safezone-ui.yaml
+        run: kubectl apply -f "$APP_DIR/safezone-ui.yaml"
 
       - name: Wait for UI healthy
         run: |
           set -euo pipefail
-          NS="safezone-preview"
           echo "Waiting for dashboard..."
           until kubectl get deploy safezone-dashboard -n "$NS" &>/dev/null && \
                 kubectl rollout status deploy/safezone-dashboard -n "$NS" --timeout=120s; do
@@ -122,5 +162,10 @@ jobs:
           done
           echo "UI is ready."
 
+      # ── Phase 6: Scheduler (staging only) ──
+      - name: Apply scheduler
+        if: ${{ inputs.environment == 'staging' }}
+        run: kubectl apply -f "$APP_DIR/safezone-scheduler.yaml"
+
       - name: Deployment complete
-        run: echo "Preview app layer deployed successfully!"
+        run: echo "${{ inputs.environment }} app layer deployed successfully!"

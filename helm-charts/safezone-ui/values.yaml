@@ -1,19 +1,41 @@
-# umbrella values for the safezone project
+# ---------------------------------
+# Global settings for all charts in the safezone-ui umbrella chart
+# These settings can be overridden in individual subcharts if needed
+# ---------------------------------
 global:
-  # the secret for the database will be shared between all subcharts
-  # there are two keys should be set with following format in the secret
-  # - db_url: postgres://<username>:<password>@<db_host>:<db_port>/<database>
-  # - replicas_url : postgres://<username>:<password>@<replicas_host>:<db_port>/<database>
-  db:
-    dbSecret: ""
-  # the repository for all subechart images
-  image:
-    pullSecret: ""
-    repository: ""
+  safezone:
+    # Optional: Override the full name of the SafeZone deployment
+    fullnameOverride: ""
 
-# consumer subchart contains the analytics API and dashboard
-consumer:
-  dashboard:
-    service:
+  environment: "" # REQUIRED: Environment name (e.g., dev,staging, production)
+  
+  ghcr:
+    imagePullSecrets: "" # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io 
+  
+  # Service discovery settings for inter-service communication
+  # You can customize the service names and ports based on your deployment
+  # These settings are used in the subcharts to configure service endpoints 
+  # And the access URLs for each service in the ConfigMap: safezone-config
+  serviceDiscovery:
+    timeServer:
+      name: time-server
+      port: 8000
+    analyticsAPI:
+      name: analytics-api
+      port: 8000
+    dashboard:
+      name: dashboard
       port: 8080
-    affinity: {}
+
+# ---------------------------------
+# dashboard is a service that provides a web-based interface for the SafeZone project.
+# It is designed to work with the SafeZone project and provides a way to interact with the system through a graphical interface.
+# dashboard references: https://github.com/rebodutch/SafeZone/blob/staging/tools/dashboard/README.md
+# ---------------------------------
+dashboard:
+  image:
+    repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications
+    tag: 0.2.1
+
+  logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
+  affinity: {}  # Optional: Node affinity rules for Dashboard pods

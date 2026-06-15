@@ -1,9 +1,13 @@
+{{- if .Values.job.script }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}
   labels:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
+  annotations:
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
 spec:
   backoffLimit: 1
   template:
@@ -12,14 +16,15 @@ spec:
         - name: {{ .Values.image.pullSecret }}
       restartPolicy: Never
       containers:
-        - name: cli-db-init
+        - name: {{ .Values.job.name}}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
           command: 
             - bash
-            - {{ .Values.job.script }}
+            - "scripts/{{ .Values.job.script }}"
           env:
             - name: ENVIRONMENT
-              value: staging
+              value: {{ .Values.env.environment | quote }}
             - name: RELAY_TIMEOUT
               value: {{ .Values.env.relayTimeout | quote }}
             - name: TOKEN_FILE
@@ -44,3 +49,4 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.auth.authSecret }}
                   key: refresh_token
+{{- end }}

@@ -1,9 +1,32 @@
 # secret files
+unencrypted/
 unsealed-*
+
+# local files
+*.local*
 
 # for helm debug
 rendered/
-dry_run.txt
+
+# for local testing
+*.result
+
+# sensitive folders
+unencrypted/
+unsealed/
+
+# sensitive files
+unsealed-*
+
+# for local testing
+*.result
+
+# sensitive folders
+unencrypted/
+unsealed/
+
+# sensitive files
+unsealed-*
 
 rolefile.yaml
 
@@ -11,4 +34,6 @@ rolefile.yaml
 
 .secrets
 
-*kubeconfig*
+kubeconfig*.yaml
+# Helm chart dependencies
+**/charts/*.tgz

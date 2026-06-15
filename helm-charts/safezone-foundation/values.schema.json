@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "type": "object",
+  "properties": {
+    "global": {
+      "type": "object",
+      "properties": {
+        "ghcr": {
+          "type": "object",
+          "properties": {
+            "imagePullSecrets": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["imagePullSecrets"]
+        }
+      },
+      "required": ["ghcr"]
+    },
+    "cliRelay": {
+      "type": "object",
+      "properties": {
+          "auth": {
+          "type": "object",
+          "properties": {
+            "roleFile": {
+              "type": "string",
+              "minLength": 1
+            },
+            "authSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["roleFile", "authSecret"]
+        }
+      },
+      "required": ["auth"]
+    },
+    "cache": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "existingSecret": {
+            "redisSecret": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["existingSecret"]
+        }
+      },
+      "required": ["auth"]
+    }
+  },
+  "required": ["global", "cliRelay", "cache"]
+}
