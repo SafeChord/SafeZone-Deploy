@@ -5,7 +5,7 @@ global:
 
 dashboard:
   image:
-    tag: 0.2.1 # Phase C: point at the official release tag on promotion
+    tag: 0.3.6 # Phase C: point at the official release tag on promotion
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
