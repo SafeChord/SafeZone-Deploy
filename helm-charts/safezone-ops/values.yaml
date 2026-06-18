@@ -30,6 +30,9 @@ job:
 
 cronjob:
   enabled: false
-  schedule: "0 1 * * *" # UTC, default: 1 AM daily
+  schedule: "0 1 * * *" # 01:00 in `timeZone` below
+  # Required: pin the schedule's timezone. Empty => controller node's local TZ
+  # (ct-serv-jp = Europe/Berlin), which DST-shifts the fire time off UTC.
+  timeZone: "Etc/UTC"
   command: [] # REQUIRED when enabled, e.g. [bash, /app/routines/staging/daily_simulate.sh]
   args: []

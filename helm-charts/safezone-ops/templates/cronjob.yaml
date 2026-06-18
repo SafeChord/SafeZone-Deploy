@@ -7,6 +7,11 @@ metadata:
     {{- include "safezone.selectorLabels" . | nindent 4 }}
 spec:
   schedule: {{ .Values.cronjob.schedule | quote }}
+  {{- with .Values.cronjob.timeZone }}
+  # Pin schedule interpretation; without this the controller node's local TZ
+  # (ct-serv-jp = Europe/Berlin) applies and DST-shifts the fire time.
+  timeZone: {{ . | quote }}
+  {{- end }}
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
