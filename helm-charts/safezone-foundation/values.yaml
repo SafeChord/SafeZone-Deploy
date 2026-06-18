@@ -125,7 +125,9 @@ timeServer:
 # SafeZone is exposed through Gateway API HTTPRoutes attached to the shared NGF
 # public gateway (TLS terminates at the gateway listener with a wildcard cert,
 # so no per-app TLS config here). Environments differ only by `route.host`.
-# cli-relay is NOT exposed (kept internal since CVE-2026-42945).
+# cli-relay IS exposed under `/cli` (relay enforces Google OAuth + RBAC). It was
+# kept internal under the old nginx-ingress (CVE-2026-42945 attack surface); the
+# NGF/Gateway API path no longer carries that exposure, so the route is restored.
 # ----------------------------------
 route:
   gateway:
@@ -144,3 +146,7 @@ route:
     # Legacy Dash comparison exhibit. Must match the app's self-prefix
     # (Dash `requests_pathname_prefix`) — the route does NOT strip it.
     dashboardClassic: /dashboard-classic
+    # External entry for szcli's Relay. The prefix is stripped at the gateway so
+    # the relay sees the same root paths it does in-cluster (point the Client at
+    # https://<host>/cli).
+    cli: /cli

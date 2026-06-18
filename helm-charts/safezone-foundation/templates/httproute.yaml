@@ -60,3 +60,18 @@ spec:
       backendRefs:
         - name: {{ include "safezone.dashboard.basename" . }}
           port: {{ include "safezone.dashboard.port" . }}
+    # szcli Relay: strip the public prefix so the relay roots at / (as in-cluster).
+    # Auth is the relay's own Google OAuth + RBAC, not a gateway concern.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.cli }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: {{ include "safezone.cliRelay.basename" . }}
+          port: {{ include "safezone.cliRelay.port" . }}
