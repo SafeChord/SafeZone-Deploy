@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-scheduler
+  name: safezone-ops-cases
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -13,7 +13,7 @@ spec:
     path: helm-charts/safezone-ops
     helm:
       valueFiles:
-        - values-staging-cronjob.yaml
+        - values-staging-cases.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: safezone

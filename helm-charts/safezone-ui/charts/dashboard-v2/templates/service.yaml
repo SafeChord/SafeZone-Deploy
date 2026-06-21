@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "safezone.dashboardV2.basename" . }}
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  selector:
+    app: dashboard-v2
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      name: http
+      port: {{ include "safezone.dashboardV2.port" . }}
+      targetPort: 80

@@ -119,3 +119,17 @@ http://{{ include "safezone.analyticsAPI.basename" . }}.{{include "safezone.svc.
 {{- define "safezone.dashboard.url" -}}
 http://{{ include "safezone.dashboard.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.dashboard.port" . }}
 {{- end }}
+
+{{/* Dashboard v2 (React SPA) */}}
+
+{{- define "safezone.dashboardV2.port" -}}
+{{ default 80 .Values.global.serviceDiscovery.dashboardV2.port }}
+{{- end }}
+
+{{- define "safezone.dashboardV2.basename" -}}
+{{ include "fullname" . }}-{{ default "dashboard-v2" .Values.global.serviceDiscovery.dashboardV2.name }}
+{{- end }}
+
+{{- define "safezone.dashboardV2.url" -}}
+http://{{ include "safezone.dashboardV2.basename" . }}.{{include "safezone.svc.postfix" . }}:{{ include "safezone.dashboardV2.port" . }}
+{{- end }}

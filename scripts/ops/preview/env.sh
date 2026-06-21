@@ -14,10 +14,10 @@ SIMULATOR_PVC="simulator-data-pvc"
 SIMULATOR_PV="acer-nfs-1g-1"
 
 INFRA_LABEL="safezone.io/stage=preview-infra"
-APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-seed-schema, safezone-seed-cases)"
+APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-ops-schema, safezone-ops-cases, safezone-ops-smoke)"
 
 FOUNDATION_DEPLOYS="safezone-cli-relay safezone-time-server"
 CORE_DEPLOYS="safezone-analytics-api safezone-ingestor safezone-pandemic-simulator"
-UI_DEPLOY="safezone-dashboard"
+UI_DEPLOY="safezone-dashboard safezone-dashboard-v2"
 
 VALKEY_STATEFULSETS="valkey-cache valkey-state"

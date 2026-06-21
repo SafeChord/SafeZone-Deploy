@@ -1,0 +1,11 @@
+apiVersion: v2
+name: safezone-ops
+description: Chart for operational Jobs (seed, smoke, scheduled routines) in SafeZone project
+type: application
+version: 0.3.6
+appVersion: "0.3.6"
+
+dependencies:
+- name: safezone-common
+  version: 0.3.6
+  repository: "file://../safezone-common"

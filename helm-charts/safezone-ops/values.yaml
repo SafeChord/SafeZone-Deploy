@@ -1,0 +1,38 @@
+global:
+  safezone:
+    fullnameOverride: ""
+
+image:
+  # Unified operational image: smoke_test.py at /app, routine scripts at
+  # /app/routines/<env>/. Every instance sets job.command explicitly — the
+  # chart does not rely on the image ENTRYPOINT.
+  repository: ghcr.io/rebodutch/safezone-cli-ops
+  # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io
+  # If your images are public, you can set this to an empty string ""
+  pullSecret: ""
+  tag: 0.3.6
+
+auth:
+  # REQUIRED: Name of the Kubernetes Secret containing Google OAuth credentials
+  # The secret must include the key `CLIENT_ID`
+  # Google OAuth reference: https://developers.google.com/identity/protocols/oauth2/web-server#creatingcred
+  authSecret: ""
+env:
+  relayTimeout: 3600 # timeout in seconds for relay operations
+  tokenFile: /app/.temp_token.json # path to store temporary OAuth token
+
+job:
+  name: "" # REQUIRED: Name of the Kubernetes Job
+  # REQUIRED: what this instance runs (replaces the image ENTRYPOINT entirely).
+  # Routines: [bash, /app/routines/<env>/<x>.sh]; smoke: [python, /app/smoke_test.py]
+  command: []
+  args: []
+
+cronjob:
+  enabled: false
+  schedule: "0 1 * * *" # 01:00 in `timeZone` below
+  # Required: pin the schedule's timezone. Empty => controller node's local TZ
+  # (ct-serv-jp = Europe/Berlin), which DST-shifts the fire time off UTC.
+  timeZone: "Etc/UTC"
+  command: [] # REQUIRED when enabled, e.g. [bash, /app/routines/staging/daily_simulate.sh]
+  args: []

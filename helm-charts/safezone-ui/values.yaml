@@ -26,16 +26,31 @@ global:
     dashboard:
       name: dashboard
       port: 8080
+    dashboardV2:
+      name: dashboard-v2
+      port: 80
 
 # ---------------------------------
-# dashboard is a service that provides a web-based interface for the SafeZone project.
-# It is designed to work with the SafeZone project and provides a way to interact with the system through a graphical interface.
+# dashboard (classic) is the legacy Plotly Dash interface, kept as an on-demand
+# comparison exhibit. It self-prefixes to /dashboard-classic/.
 # dashboard references: https://github.com/rebodutch/SafeZone/blob/staging/tools/dashboard/README.md
 # ---------------------------------
 dashboard:
   image:
     repository: ghcr.io/rebodutch/safezone-dashboard # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.2.1
+    tag: 0.3.6
 
   logLevel: INFO # Optional: Loglevel (e.g., DEBUG, INFO, WARN, ERROR)
   affinity: {}  # Optional: Node affinity rules for Dashboard pods
+
+# ---------------------------------
+# dashboard-v2 is the default web interface: a React SPA served as static files
+# by nginx (no app runtime). It is exposed at /dashboard; its /dashboard/api and
+# /dashboard/time calls are routed by the gateway HTTPRoute, not this container.
+# ---------------------------------
+dashboard-v2:
+  image:
+    repository: ghcr.io/rebodutch/safezone-dashboard-v2 # DO NOT CHANGE unless you fully understand its implications
+    tag: 0.3.6
+
+  affinity: {}  # Optional: Node affinity rules for Dashboard v2 pods

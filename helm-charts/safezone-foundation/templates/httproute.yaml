@@ -1,0 +1,77 @@
+# App exposure via the shared NGF public gateway (Gateway API).
+# Path precedence is longest-prefix: /dashboard/api and /dashboard/time win over
+# /dashboard; /dashboard-classic is element-disjoint from /dashboard (no swallow).
+# Backends in core/ui fill in at later deploy phases; until then those rules 500.
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ include "fullname" . }}-dashboard
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - name: {{ .Values.route.gateway.name }}
+      namespace: {{ .Values.route.gateway.namespace }}
+      sectionName: https
+  hostnames:
+    - {{ .Values.route.host }}
+  rules:
+    # SPA backend calls live UNDER the dashboard prefix (derived, not separate
+    # values): strip the public prefix, both services root at /.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.dashboard }}/api
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: {{ include "safezone.analyticsAPI.basename" . }}
+          port: {{ include "safezone.analyticsAPI.port" . }}
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.dashboard }}/time
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: {{ include "safezone.timeServer.basename" . }}
+          port: {{ include "safezone.timeServer.port" . }}
+    # Default face: dashboard-v2 SPA (nginx serves index.html under this prefix).
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.dashboard }}
+      backendRefs:
+        - name: {{ include "safezone.dashboardV2.basename" . }}
+          port: {{ include "safezone.dashboardV2.port" . }}
+    # Comparison exhibit: legacy Dash self-prefixes to this path — no strip.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.dashboardClassic }}
+      backendRefs:
+        - name: {{ include "safezone.dashboard.basename" . }}
+          port: {{ include "safezone.dashboard.port" . }}
+    # szcli Relay: strip the public prefix so the relay roots at / (as in-cluster).
+    # Auth is the relay's own Google OAuth + RBAC, not a gateway concern.
+    - matches:
+        - path:
+            type: PathPrefix
+            value: {{ .Values.route.paths.cli }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: /
+      backendRefs:
+        - name: {{ include "safezone.cliRelay.basename" . }}
+          port: {{ include "safezone.cliRelay.port" . }}

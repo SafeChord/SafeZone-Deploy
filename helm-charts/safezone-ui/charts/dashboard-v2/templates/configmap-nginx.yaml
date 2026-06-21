@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "safezone.dashboardV2.basename" . }}-nginx
+  labels:
+    {{- include "safezone.selectorLabels" . | nindent 4 }}
+    app: dashboard-v2
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # TLS terminates at the gateway, so $scheme here is http — absolute
+        # redirects would bounce clients through an extra http->https hop.
+        absolute_redirect off;
+
+        # Trailing-slash entry: nginx only auto-redirects real directories,
+        # and the alias'd SPA location never matches the bare prefix.
+        location = /dashboard {
+            return 301 /dashboard/;
+        }
+
+        # SPA: serve index.html for all /dashboard/ routes
+        location /dashboard/ {
+            alias /usr/share/nginx/html/;
+            try_files $uri $uri/ /index.html;
+        }
+
+        # /dashboard/api/ and /dashboard/time/ are routed by the gateway
+        # HTTPRoute directly to analytics-api and time-server services.
+        # Requests to those paths never reach this container.
+
+        # Health check
+        location /health {
+            access_log off;
+            return 200 '{"status":"healthy"}';
+            add_header Content-Type application/json;
+        }
+    }
