@@ -248,7 +248,7 @@ jobs:
           if [ -z "$NUM" ]; then
             echo "No candidate announcement found — creating the freight issue at validation time."
             URL=$(gh issue create --repo "$GITHUB_REPOSITORY" --label freight \
-              --title "$TITLE" --body "Created at validation time (no candidate announcement from publish-dev).")
+              --title "$TITLE" --body "Created at validation time (no candidate announcement from publish-candidate).")
             NUM="${URL##*/}"
           fi
           BODY=$(printf '**Automated in-cluster checks passed** (environment: preview, branch: `%s`). Run: %s/%s/actions/runs/%s\n\n- [x] deployment rollouts healthy\n- [x] seed-schema + seed-cases jobs complete\n- [x] Phase 3.5 smoke gate (szcli data-path) green\n\nStill required before the `validated` label (run `/validate-freight %s`):\n- [ ] gateway log scan clean (no 4xx/5xx on dashboard routes)\n- [ ] external-DNS probes (both dashboards, API/time, big-POST != 413, http->301)\n- [ ] human visual check (map renders, charts sensible)' \
