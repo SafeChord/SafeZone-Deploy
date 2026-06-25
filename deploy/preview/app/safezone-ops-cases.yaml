@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-ops-cases
+  name: safezone-preview-ops-cases
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,6 +12,7 @@ spec:
     targetRevision: preview/0.3.7
     path: helm-charts/safezone-ops
     helm:
+      releaseName: safezone-ops-cases
       valueFiles:
         - values-preview-cases.yaml
   destination:

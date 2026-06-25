@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-ui
+  name: safezone-preview-ui
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,6 +12,7 @@ spec:
     targetRevision: preview/0.3.7
     path: helm-charts/safezone-ui
     helm:
+      releaseName: safezone-ui
       valueFiles:
         - values-preview.yaml
   destination:

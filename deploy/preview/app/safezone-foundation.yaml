@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-foundation
+  name: safezone-preview-foundation
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,6 +12,7 @@ spec:
     targetRevision: preview/0.3.7
     path: helm-charts/safezone-foundation
     helm:
+      releaseName: safezone-foundation
       valueFiles:
         - values-preview.yaml
   destination:
