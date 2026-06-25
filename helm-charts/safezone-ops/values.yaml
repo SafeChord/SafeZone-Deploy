@@ -10,7 +10,7 @@ image:
   # REQUIRED: Name of the Kubernetes Secret for pulling images from ghcr.io
   # If your images are public, you can set this to an empty string ""
   pullSecret: ""
-  tag: 0.3.6
+  tag: 0.3.7
 
 auth:
   # REQUIRED: Name of the Kubernetes Secret containing Google OAuth credentials

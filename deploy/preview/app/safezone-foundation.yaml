@@ -9,7 +9,7 @@ spec:
   project: safezone
   source:
     repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
-    targetRevision: preview/0.3.6
+    targetRevision: preview/0.3.7
     path: helm-charts/safezone-foundation
     helm:
       valueFiles:

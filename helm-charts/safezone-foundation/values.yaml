@@ -76,7 +76,7 @@ global:
 cliRelay:
   image: 
     repository: ghcr.io/rebodutch/safezone-cli-relay # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.3.6
+    tag: 0.3.7
   auth:
     # REQUIRED: Path to the role file within the container
     # This file defines the roles and permissions for CLI Relay operations
@@ -107,7 +107,7 @@ cliRelay:
 timeServer:
   image:
     repository: ghcr.io/rebodutch/safezone-time-server # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.3.6
+    tag: 0.3.7
 
   redis:
     host: "" # Optional: Override global.redis.host for Time Server

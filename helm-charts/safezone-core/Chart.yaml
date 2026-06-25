@@ -2,17 +2,17 @@ apiVersion: v2
 name: safezone-core
 description:  Umbrella chart for SafeZone project at development phase core services
 type: application
-version: 0.3.6
-appVersion: "0.3.6"
+version: 0.3.7
+appVersion: "0.3.7"
 
 dependencies:
 - name: safezone-common
-  version: 0.3.6
+  version: 0.3.7
   repository: "file://../safezone-common"
 # The core subcharts for the safezone project
 - name: writePipeline
-  version: 0.3.6
+  version: 0.3.7
   repository: "file://charts/writePipeline"
 - name: readPipeline
-  version: 0.3.6
+  version: 0.3.7
   repository: "file://charts/readPipeline"
