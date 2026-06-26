@@ -2,16 +2,17 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-core
+  name: safezone-preview-core
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: safezone
   source:
     repoURL: https://github.com/SafeChord/SafeZone-Deploy.git
-    targetRevision: preview/0.3.6
+    targetRevision: preview/0.3.7
     path: helm-charts/safezone-core
     helm:
+      releaseName: safezone-core
       valueFiles:
         - values-preview.yaml
   destination:

@@ -4,8 +4,8 @@ global:
     imagePullSecrets: ghcr-pull-secret 
 
 dashboard:
-  image:
-    tag: 0.3.6-6dc8a95
+  # FROZEN classic exhibit — no per-env image override; inherits the pinned tag
+  # from values.yaml (0.3.6). See values.yaml for the freeze rationale.
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
@@ -18,7 +18,7 @@ dashboard:
 
 dashboard-v2:
   image:
-    tag: 0.3.6-6dc8a95
+    tag: 0.3.7-168eb6e
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

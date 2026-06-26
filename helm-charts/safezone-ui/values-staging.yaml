@@ -4,8 +4,8 @@ global:
     imagePullSecrets: ghcr-pull-secret
 
 dashboard:
-  image:
-    tag: 0.3.6 # Phase C: point at the official release tag on promotion
+  # FROZEN classic exhibit — no per-env image override; inherits the pinned tag
+  # from values.yaml (0.3.6). See values.yaml for the freeze rationale.
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

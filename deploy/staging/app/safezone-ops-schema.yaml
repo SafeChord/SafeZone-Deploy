@@ -2,7 +2,7 @@ apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   namespace: argocd
-  name: safezone-ops-schema
+  name: safezone-staging-ops-schema
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
@@ -12,6 +12,7 @@ spec:
     targetRevision: staging
     path: helm-charts/safezone-ops
     helm:
+      releaseName: safezone-ops-schema
       valueFiles:
         - values-staging-schema.yaml
   destination:

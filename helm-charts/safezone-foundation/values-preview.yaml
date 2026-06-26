@@ -14,7 +14,7 @@ global:
 
 cliRelay:
   image:
-    tag: 0.3.6-6dc8a95
+    tag: 0.3.7-168eb6e
   auth:
     roleFile: /app/roles.yml
     authSecret: safezone-auth-secrets
@@ -30,7 +30,7 @@ cliRelay:
 
 timeServer:
   image:
-    tag: 0.3.6-6dc8a95
+    tag: 0.3.7-168eb6e
   affinity:
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:

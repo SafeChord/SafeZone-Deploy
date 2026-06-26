@@ -37,3 +37,4 @@ rolefile.yaml
 kubeconfig*.yaml
 # Helm chart dependencies
 **/charts/*.tgz
+**/Chart.lock
