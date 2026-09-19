@@ -18,7 +18,15 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: safezone
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: safezone-worker
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - RespectIgnoreDifferences=true
