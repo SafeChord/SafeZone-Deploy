@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: acer-nfs-1g-1
+  name: acer-local-1g-1
   annotations:
     argocd.argoproj.io/sync-wave: '-1'
   labels:
@@ -10,10 +10,20 @@ metadata:
 spec:
   capacity:
     storage: 1Gi
-  storageClassName: local-nfs
+  storageClassName: local-path
   accessModes:
     - ReadOnlyMany
   persistentVolumeReclaimPolicy: Retain
-  nfs:
+  claimRef:
+    namespace: safezone-preview
+    name: simulator-data-pvc
+  local:
     path: /mnt/k3s/pv/1g/1
-    server: 192.168.0.2
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - acer-agent

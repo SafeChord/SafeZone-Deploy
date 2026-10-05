@@ -37,7 +37,8 @@ writePipeline:
     volume:
       persistentVolumeClaim:
         type: "full-data"
-        volumeName: "acer-nfs-1g-3"
+        volumeName: "acer-local-1g-3"
+        storageClassName: "local-path"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:

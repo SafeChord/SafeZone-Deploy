@@ -38,6 +38,7 @@ writePipeline:
     volume:
       persistentVolumeClaim:
         type: "smoke-test"
+        storageClassName: "local-path"
     affinity:
       nodeAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
