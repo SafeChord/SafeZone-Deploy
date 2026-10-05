@@ -37,7 +37,7 @@ writePipeline:
     volume:
       persistentVolumeClaim:
         type: "full-data"
-        volumeName: "acer-local-1g-3"
+        volumeName: "acer-local-1g-simulator-staging"
         storageClassName: "local-path"
     affinity:
       nodeAffinity:

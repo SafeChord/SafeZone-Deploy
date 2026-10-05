@@ -15,7 +15,7 @@ KAFKA_TOPIC="covid-case-data"
 KAFKA_TOPIC_NS="kafka"
 
 SIMULATOR_PVC="simulator-data-pvc"
-SIMULATOR_PV="acer-local-1g-3"
+SIMULATOR_PV="acer-local-1g-simulator-staging"
 
 INFRA_LABEL="safezone.io/stage=staging-infra"
 APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-ops-schema, safezone-ops-cases, safezone-ops-smoke, safezone-scheduler)"

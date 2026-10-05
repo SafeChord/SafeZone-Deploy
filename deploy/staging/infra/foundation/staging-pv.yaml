@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: acer-local-1g-3
+  name: acer-local-1g-simulator-staging
   labels:
     app: safezone-simulator
     type: full-data
