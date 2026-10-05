@@ -18,7 +18,7 @@ spec:
     namespace: safezone-preview
     name: simulator-data-pvc
   local:
-    path: /mnt/k3s/pv/1g/1
+    path: /mnt/k3han-pv/safezone/simulator/preview/covid-data
   nodeAffinity:
     required:
       nodeSelectorTerms:
