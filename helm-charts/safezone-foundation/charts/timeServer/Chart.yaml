@@ -2,10 +2,10 @@ apiVersion: v2
 name: timeServer
 description: SafeZone Time Server
 type: application
-version: 0.3.7
+version: 0.3.8
 appVersion: 0.3.7
 
 dependencies:
 - name: safezone-common
-  version: 0.3.7
+  version: 0.3.8
   repository: "file://../../../safezone-common"

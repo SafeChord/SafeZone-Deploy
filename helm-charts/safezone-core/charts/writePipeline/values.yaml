@@ -57,6 +57,9 @@ simulator:
       # type of data to simulate, only two types are supported: smoke-test and full-data
       # it is a selector to bind to different PVs with different data sets
       type: "smoke-test"
+
+      # storage class of the PVC; must match the class of the PV it binds to
+      storageClassName: "local-nfs"
       
 
 # a data ingestor that receives data from the simulator and produces events to Kafka

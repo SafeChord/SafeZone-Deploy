@@ -5,7 +5,7 @@ metadata:
 spec:
   accessModes:
     - ReadOnlyMany
-  storageClassName: "local-nfs"
+  storageClassName: {{ .Values.simulator.volume.persistentVolumeClaim.storageClassName | quote }}
   resources:
     requests:
       storage: 1Gi
