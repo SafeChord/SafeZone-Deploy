@@ -8,7 +8,10 @@ source "$SCRIPT_DIR/env.sh"
 echo "=== Teardown Staging Infra Layer ==="
 
 # Only this env's app layer blocks: the other env's Applications may coexist
-APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}' 2>/dev/null || true)
+APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}') || {
+  echo "ERROR: Cannot list ArgoCD Applications; refusing to tear down."
+  exit 1
+}
 OWN_APPS=""
 for APP in $APP_NAMES; do
   case "$APP" in "$APP_PREFIX"*) OWN_APPS="$OWN_APPS $APP" ;; esac
