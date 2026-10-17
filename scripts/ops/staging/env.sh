@@ -5,6 +5,7 @@ NAMESPACE="safezone"
 APPSET_NAME="safezone-staging-infra-stage"
 APPSET_MANIFEST="deploy/staging/infra/application.yaml"
 APP_DIR="deploy/staging/app"
+APP_PREFIX="safezone-staging-"  # app-layer Application names; the other env's may coexist
 
 # DB is Chorde platform service — no CNPG cluster in namespace
 # Database CRD lives in database namespace

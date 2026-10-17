@@ -41,14 +41,16 @@ echo "Note: Infra resources (Valkey Cache, KafkaTopic, DB CRD) are untouched."
 # --- Verify ---
 echo ""
 echo "--- Verify ---"
-REMAINING=$(kubectl get application -n argocd -l "$INFRA_LABEL" -o name 2>/dev/null || true)
-NON_INFRA=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}' 2>/dev/null || true)
-# Filter out infra apps
-for APP in $NON_INFRA; do
-  if ! echo "$APP" | grep -q "staging-infra-"; then
-    echo "  WARNING: app-layer Application still found: $APP"
-  fi
+APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}' 2>/dev/null || true)
+REMAINING=""
+for APP in $APP_NAMES; do
+  case "$APP" in "$APP_PREFIX"*) REMAINING="$REMAINING $APP" ;; esac
 done
+if [ -z "$REMAINING" ]; then
+  echo "  ArgoCD app-layer Applications: CLEAN"
+else
+  echo "  WARNING: app-layer Applications still found:$REMAINING"
+fi
 
 APP_PODS=$(kubectl get pod -n "$NAMESPACE" -l "$APP_LABELS" --no-headers 2>/dev/null | wc -l)
 if [ "$APP_PODS" -eq 0 ]; then

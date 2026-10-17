@@ -5,6 +5,7 @@ NAMESPACE="safezone-preview"
 APPSET_NAME="safezone-preview-infra-stage"
 APPSET_MANIFEST="deploy/preview/infra/application.yaml"
 APP_DIR="deploy/preview/app"
+APP_PREFIX="safezone-preview-"  # app-layer Application names; the other env's may coexist
 
 CNPG_CLUSTER="db-primary"
 KAFKA_TOPIC="preview-covid-case-data"
