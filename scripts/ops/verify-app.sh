@@ -132,14 +132,27 @@ elif [ -n "$BAD" ]; then gate F3 0 "not ready or restarted after the deploy: $(o
 else gate F3 1 "$(grep -c . <<<"$PODS") pods" "$EXPECT"; fi
 
 # --- F4 · Smoke gate of the deploy ---
-EXPECT="run at ${BRANCH:-?} head ${HEAD:0:7}, smoke success"
+# What runs is what the run deployed as long as no commit since touches a path ArgoCD renders
+# (helm-charts/, deploy/); a commit confined to scripts/ or .github/ may move the head past it.
+EXPECT="run at ${BRANCH:-?} head, or head ahead with nothing changed under helm-charts/ or deploy/; smoke success"
 if [ "$(grep -c . <<<"$BRANCH")" -ne 1 ]; then
   gate F4 0 "app layer tracks branches: $(oneline <<<"${BRANCH:-none}")" "one branch"
 elif [ -z "$RUN_ID" ] || [ -z "$HEAD" ]; then
   gate F4 0 "no successful init-deploy run or branch head on $BRANCH" "$EXPECT"
 else
-  OK=0; [ "$RUN_SHA" = "$HEAD" ] && [ "$SMOKE" = success ] && OK=1
-  gate F4 "$OK" "run $RUN_ID at ${RUN_SHA:0:7}, smoke ${SMOKE:-none}" "$EXPECT"
+  SINCE="at head" LIVE_OK=1
+  if [ "$RUN_SHA" != "$HEAD" ]; then
+    # The compare status ("ahead" when the head descends from the run), then each file changed since.
+    COMPARE=$(gh api "repos/$REPO/compare/$RUN_SHA...$HEAD" -q '.status, .files[].filename' 2>/dev/null)
+    STATUS=$(head -n 1 <<<"$COMPARE")
+    LIVE=$(tail -n +2 <<<"$COMPARE" | grep -E '^(helm-charts|deploy)/')
+    LIVE_OK=0
+    if [ "$STATUS" != ahead ]; then SINCE="head ${HEAD:0:7} ${STATUS:-not compared}"
+    elif [ -n "$LIVE" ]; then SINCE="head ${HEAD:0:7} changed $(grep -c . <<<"$LIVE") live files: $(head -n 3 <<<"$LIVE" | oneline)..."
+    else SINCE="head ${HEAD:0:7} ahead, no live path changed"; LIVE_OK=1; fi
+  fi
+  OK=0; [ "$LIVE_OK" = 1 ] && [ "$SMOKE" = success ] && OK=1
+  gate F4 "$OK" "run $RUN_ID at ${RUN_SHA:0:7} ($SINCE), smoke ${SMOKE:-none}" "$EXPECT"
 fi
 
 # --- F5 · Seed data ---
