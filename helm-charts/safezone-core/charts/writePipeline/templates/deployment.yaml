@@ -118,6 +118,9 @@ spec:
         - name: worker
           image: {{ .Values.worker.image }}:{{ .Values.worker.tag }}
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: health
+              containerPort: 8080
           env:
             - name: ENVIRONMENT
               value: {{ .Values.global.environment | quote }}
@@ -138,5 +141,17 @@ spec:
               value: {{ .Values.worker.batch.flushInterval | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.worker.logLevel | quote }}
+            - name: SERVER_PORT
+              value: "8080"
+          # /health fails only when the consume loop has not turned within LIVENESS_WINDOW (30s),
+          # not when Kafka or the database is unreachable (ADR-028, ADR-035).
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: health
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
       affinity:
         {{- toYaml .Values.worker.affinity | nindent 8 }}
