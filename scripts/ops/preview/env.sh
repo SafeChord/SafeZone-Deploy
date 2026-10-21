@@ -8,11 +8,14 @@ APP_DIR="deploy/preview/app"
 APP_PREFIX="safezone-preview-"  # app-layer Application names; the other env's may coexist
 
 CNPG_CLUSTER="db-primary"
+CNPG_CLUSTER_NS="$NAMESPACE"
 KAFKA_TOPIC="preview-covid-case-data"
 KAFKA_TOPIC_NS="kafka"
 
 SIMULATOR_PVC="simulator-data-pvc"
 SIMULATOR_PV="acer-local-1g-simulator-preview"
+
+TAG_ISSUE_LABEL="freight"  # the open issue naming the tag under validation
 
 INFRA_LABEL="safezone.io/stage=preview-infra"
 APP_LABELS="app.kubernetes.io/instance in (safezone-foundation, safezone-core, safezone-ui, safezone-ops-schema, safezone-ops-cases, safezone-ops-smoke)"
