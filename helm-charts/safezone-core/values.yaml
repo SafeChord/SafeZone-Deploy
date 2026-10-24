@@ -81,7 +81,7 @@ readPipeline:
   analyticsAPI:
     # analytics API container configuration
     image: ghcr.io/rebodutch/safezone-analytics-api
-    tag: 0.3.7
+    tag: 0.3.8
 
     # logging configuration
     logLevel: INFO
@@ -103,7 +103,7 @@ writePipeline:
   simulator:
     # simulator container configuration
     image: ghcr.io/rebodutch/safezone-pandemic-simulator
-    tag: 0.3.7
+    tag: 0.3.8
 
     # logging configuration
     logLevel: INFO
@@ -133,13 +133,16 @@ writePipeline:
         # type of data to simulate, only two types are supported: smoke-test and full-data
         # it is a selector to bind to different PVs with different data sets
         type: "smoke-test"
+
+        # storage class of the PVC; must match the class of the PV it binds to
+        storageClassName: "local-nfs"
         
 
   # a data ingestor that receives data from the simulator and produces events to Kafka
   ingestor:
     # ingestor container configuration
     image: ghcr.io/rebodutch/safezone-data-ingestor
-    tag: 0.3.7
+    tag: 0.3.8
     
     # logging configuration
     logLevel: INFO
@@ -151,7 +154,7 @@ writePipeline:
   worker:
     # worker container configuration
     image: ghcr.io/rebodutch/safezone-worker
-    tag: 0.3.7
+    tag: 0.3.8
     
     # logging configuration
     logLevel: INFO

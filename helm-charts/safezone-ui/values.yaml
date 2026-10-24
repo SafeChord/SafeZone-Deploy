@@ -54,6 +54,6 @@ dashboard:
 dashboard-v2:
   image:
     repository: ghcr.io/rebodutch/safezone-dashboard-v2 # DO NOT CHANGE unless you fully understand its implications
-    tag: 0.3.7
+    tag: 0.3.8
 
   affinity: {}  # Optional: Node affinity rules for Dashboard v2 pods

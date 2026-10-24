@@ -7,19 +7,19 @@ source "$SCRIPT_DIR/env.sh"
 # --- Pre-flight: ensure app layer is already gone ---
 echo "=== Teardown Staging Infra Layer ==="
 
-APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}' 2>/dev/null || true)
-# Filter: only flag non-infra apps
-HAS_APP_LAYER=false
+# Only this env's app layer blocks: the other env's Applications may coexist
+APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}') || {
+  echo "ERROR: Cannot list ArgoCD Applications; refusing to tear down."
+  exit 1
+}
+OWN_APPS=""
 for APP in $APP_NAMES; do
-  if ! echo "$APP" | grep -q "staging-infra-"; then
-    HAS_APP_LAYER=true
-    break
-  fi
+  case "$APP" in "$APP_PREFIX"*) OWN_APPS="$OWN_APPS $APP" ;; esac
 done
 
-if [ "$HAS_APP_LAYER" = true ]; then
+if [ -n "$OWN_APPS" ]; then
   echo "ERROR: App-layer Applications still exist. Run teardown.sh first."
-  echo "       Found: $APP_NAMES"
+  echo "       Found:$OWN_APPS"
   exit 1
 fi
 
@@ -58,11 +58,19 @@ echo "=== Staging infra teardown complete ==="
 # --- Verify ---
 echo ""
 echo "--- Verify ---"
-REMAINING=$(kubectl get application -n argocd -o jsonpath='{range .items[?(@.spec.project=="safezone")]}{.metadata.name}{" "}{end}' 2>/dev/null || true)
+APP_NAMES=$(kubectl get application -n argocd -o jsonpath='{.items[?(@.spec.project=="safezone")].metadata.name}' 2>/dev/null || true)
+REMAINING=""
+for APP in $APP_NAMES; do
+  case "$APP" in "$APP_PREFIX"*) REMAINING="$REMAINING $APP" ;; esac
+done
+INFRA_NAMES=$(kubectl get application -n argocd -l "$INFRA_LABEL" -o jsonpath='{.items[*].metadata.name}' 2>/dev/null || true)
+for APP in $INFRA_NAMES; do
+  REMAINING="$REMAINING $APP"
+done
 if [ -z "$REMAINING" ]; then
-  echo "  ArgoCD Applications (project=safezone): CLEAN"
+  echo "  ArgoCD Applications ($APP_PREFIX*, $INFRA_LABEL): CLEAN"
 else
-  echo "  WARNING: Applications still found: $REMAINING"
+  echo "  WARNING: Applications still found:$REMAINING"
 fi
 
 if kubectl get ns "$NAMESPACE" &>/dev/null; then
