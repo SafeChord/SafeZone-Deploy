@@ -2,7 +2,7 @@
 global:
   environment: "staging"
   ghcr:
-    imagePullSecret: ghcr-pull-secret
+    imagePullSecret: ""
   database:
     existingSecret: k3han-db-secrets
   redis:
