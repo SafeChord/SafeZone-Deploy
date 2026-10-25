@@ -1,0 +1,24 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches:
+      - staging
+      - 'preview/**'
+
+permissions:
+  contents: read
+
+jobs:
+  # Lint and render every chart with the value files the target environment's
+  # Applications name, so a broken chart fails here instead of on ArgoCD sync.
+  charts:
+    runs-on: ubuntu-latest
+    env:
+      TARGET_ENV: ${{ github.base_ref == 'staging' && 'staging' || 'preview' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Validate charts
+        run: bash scripts/ci/validate-charts.sh "$TARGET_ENV"
