@@ -38,6 +38,8 @@ while [ $# -gt 0 ]; do
     *) die "unknown argument: $1" ;;
   esac
 done
+# The path depends on <env>; both env.sh files are checked on their own.
+# shellcheck source=/dev/null
 source "$SCRIPT_DIR/$ENV/env.sh"
 
 # The external host is the chart's route.host for this env.
