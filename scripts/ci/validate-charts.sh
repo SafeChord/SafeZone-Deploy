@@ -60,7 +60,7 @@ while IFS='|' read -r CHART_PATH RELEASE VALUES_FILE; do
   VALUES_PATH="$CHART_DIR/$VALUES_FILE"
 
   # Run helm dependency build once per chart (local file:// deps need packaging)
-  if [[ ! " ${DEP_BUILT[*]} " =~ " ${CHART_DIR} " ]]; then
+  if [[ " ${DEP_BUILT[*]} " != *" ${CHART_DIR} "* ]]; then
     echo ""
     echo "── $CHART_NAME ──"
     DEP_BUILT+=("$CHART_DIR")
@@ -73,7 +73,7 @@ while IFS='|' read -r CHART_PATH RELEASE VALUES_FILE; do
   fi
 
   # A chart whose dependencies did not build cannot render with any values file
-  if [[ " ${DEP_FAILED[*]} " =~ " ${CHART_DIR} " ]]; then
+  if [[ " ${DEP_FAILED[*]} " == *" ${CHART_DIR} "* ]]; then
     echo "  [SKIP] $VALUES_FILE (dependencies did not build)"
     continue
   fi

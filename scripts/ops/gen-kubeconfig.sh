@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 set -e
 # Usage: gen-kubeconfig.sh <namespace>
 # Example: gen-kubeconfig.sh safezone-preview

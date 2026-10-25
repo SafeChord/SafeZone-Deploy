@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Sourced by the scripts beside it and by verify-app.sh, which use these variables;
+# ShellCheck lints each file alone, so it reports every one as unused here.
+# shellcheck disable=SC2034
 # Preview environment configuration
 
 NAMESPACE="safezone-preview"
