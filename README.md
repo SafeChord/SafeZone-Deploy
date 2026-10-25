@@ -43,6 +43,8 @@ deploy/
     infra/              # Namespace, RBAC, secrets, workloads
 
 scripts/
+  ci/
+    validate-charts.sh  # Lint and render charts as an env's Applications do (PR check)
   ops/
     gen-kubeconfig.sh   # Generate low-privilege kubeconfig for CI
     seal-secrets.sh     # Seal all unsealed secrets for an environment
