@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-# Run the validation floor (F1-F7) against one environment and, with --soak, the soak checks
+# Run the validation floor (F1-F9) against one environment and, with --soak, the soak checks
 # (S1-S5) over the window since <start>. Read-only: it changes nothing in the cluster or on GitHub.
+# F9 loads dashboard-v2 in headless Chromium (verify-dashboard.mjs, run in the Playwright image, so
+# it needs Docker; the first run pulls the image); F8 then scans the gateway log over the script's
+# own run, F9's traffic included.
 #
 # Usage: verify-app.sh <preview|staging> [--soak <start>] [--tag <tag>]
 #   --soak <start>  soak start, in any form `date -d` reads (e.g. '2026-10-21 10:14 +08:00')
@@ -9,6 +12,7 @@
 #
 # Output: one tab-separated line per check, `PASS|FAIL|REPORT <id> <observed> <expected>`;
 # lines starting with `#` are context. Exit 1 when a gating check fails, 2 on bad input.
+# A failing F9 leaves a screenshot under ${TMPDIR:-/tmp} and names it on its lines.
 # Pass conditions: harness .claude/validation/floor.md (F) and .claude/skills/validate-soak (S).
 set -uo pipefail
 
@@ -24,6 +28,8 @@ export LOKI_ADDR="${LOKI_ADDR:-http://loki.loki.svc.cluster.local:3100}"
 KAFKA_POD="k3han-cluster-dual-role-0"
 CONSUMER_GROUP="safezone-worker-group"
 CURL=(curl -s --max-time 30)
+PW_VERSION="1.64.1"  # the Playwright image and the playwright-core F9 installs in it must match
+PW_IMAGE="mcr.microsoft.com/playwright:v$PW_VERSION-noble"
 
 die() { echo "verify-app: $1" >&2; exit 2; }
 
@@ -200,6 +206,42 @@ gate F7.4 "$OK" "big-POST $CODE" "not 413"
 read -r CODE LOC < <(status_location "http://$HOST/dashboard/")
 OK=0; [ "$CODE" = 301 ] && [[ "$LOC" == https://* ]] && OK=1
 gate F7.5 "$OK" "http:// $CODE location=${LOC:-none}" "301 to https://"
+
+# --- F9 · dashboard-v2 renders ---
+# The page's own checks are in verify-dashboard.mjs; its requests are the browser traffic F8 scans.
+SHOTS=$(mktemp -d "${TMPDIR:-/tmp}/verify-app-f9.XXXXXX")
+OUT=$(docker run --rm --init --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$SCRIPT_DIR/verify-dashboard.mjs:/f9/verify-dashboard.mjs:ro" -v "$SHOTS:$SHOTS" "$PW_IMAGE" \
+  sh -c 'mkdir /tmp/f9 && cd /tmp/f9 && cp /f9/verify-dashboard.mjs . \
+    && npm install --loglevel=error --no-audit --no-fund "playwright-core@$0" >/dev/null \
+    && node verify-dashboard.mjs "$1" "$2"' "$PW_VERSION" "$H/dashboard/" "$SHOTS" 2>&1)
+RESULTS=$(grep -E $'^(PASS|FAIL|REPORT)\t' <<<"$OUT")
+if [ -z "$RESULTS" ]; then
+  MSG=$(grep -im1 error <<<"$OUT" || grep . <<<"$OUT" | tail -n 1)
+  gate F9 0 "no result: $MSG" "dashboard-v2 checked"
+else
+  while IFS=$'\t' read -r R ID OBS EXP; do emit "$R" "$ID" "$OBS" "$EXP"; done <<<"$RESULTS"
+fi
+rmdir "$SHOTS" 2>/dev/null  # left only when it holds a failing F9's screenshot
+
+# --- F8 · Gateway log scan ---
+# Over the script's own run, which holds F7's curl probes and F9's browser traffic; --since is
+# relative, so the host's clock need not match the node's. The access log has no host field: with
+# both environments up, the scan covers both.
+GW=$(kubectl get pods -n nginx-gateway -o name | grep public | head -n 1)
+EXPECT="browser requests > 0; other statuses only F7.4's big-POST or a favicon.ico 404"
+if LOG=$(kubectl logs "$GW" -n nginx-gateway -c nginx --since="$((SECONDS + 1))s" 2>&1); then
+  ACCESS=$(grep -E ' - - \[.*"[A-Z]+ /dashboard' <<<"$LOG")
+  BROWSER=$(grep . <<<"$ACCESS" | grep -vc '"curl/')
+  OTHER=$(grep . <<<"$ACCESS" | grep -vE '" (200|204|301|304|308) ' \
+    | grep -vE '"POST /dashboard-classic/_dash-update-component [^"]*" (400|415) .*"curl/' \
+    | grep -vE '"GET [^ "]*favicon\.ico[^ "]* [^"]*" 404 ' \
+    | sed -E 's/.*"([A-Z]+) ([^ ]+) [^"]*" ([0-9]+) .*/\3 \1 \2/')
+  OK=0; [ "$BROWSER" -gt 0 ] && [ -z "$OTHER" ] && OK=1
+  gate F8 "$OK" "$BROWSER browser requests in ${SECONDS}s, other statuses: $(oneline <<<"${OTHER:-none}")" "$EXPECT"
+else
+  gate F8 0 "cannot read ${GW:-the public gateway}'s log: $(tail -n 1 <<<"$LOG")" "$EXPECT"
+fi
 
 if [ -n "$SOAK_START" ]; then
   prom() { # <query> -> one "pod/container" line per series; fails on a query error
